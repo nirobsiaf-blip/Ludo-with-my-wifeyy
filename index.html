@@ -198,7 +198,7 @@ h1,h2,h3{font-family:'Space Grotesk',sans-serif}
 <canvas id="confetti"></canvas>
 </div>
 
-<script type="module">
+<script>
 const $=s=>document.querySelector(s);
 async function hashP(s){const e=new TextEncoder().encode(s);const b=await crypto.subtle.digest('SHA-256',e);return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}
 function toast(m,ms=3200){let t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),400)},ms)}
@@ -208,24 +208,8 @@ function playS(type='move'){if(!soundOn)return;try{if(!audioCtx)audioCtx=new (wi
 const AUTH_KEY='sn-ludo-auth-v3';
 const getAuth=()=>{try{return JSON.parse(localStorage.getItem(AUTH_KEY)||'{}')}catch{return{}}};
 const saveAuth=o=>localStorage.setItem(AUTH_KEY,JSON.stringify(o));
-async function loginFlow(p){
-  const store=getAuth();const has=!!store[p];
-  $('#authT').textContent=has?`Welcome back, ${p}`:`Set password for ${p}`;
-  $('#authD').textContent=has?`Password dao. Only tumra 2 jon khelte parba.`:`First time - ekta password set koro`;
-  $('#authP').value='';$('#authModal').classList.remove('hidden');$('#authP').focus();
-  return new Promise((res,rej)=>{
-    const submit=async()=>{
-      const pwd=$('#authP').value.trim();if(pwd.length<4){toast('Min 4 chars');return}
-      const h=await hashP(p+':'+pwd);const cur=getAuth();
-      if(!cur[p]){cur[p]=h;saveAuth(cur);$('#authModal').classList.add('hidden');cleanup();res(p);toast('Password set')}
-      else{if(cur[p]===h){$('#authModal').classList.add('hidden');cleanup();res(p);}else{toast('Wrong password');playS('kill')}}
-    };
-    const cancel=()=>{$('#authModal').classList.add('hidden');cleanup();rej('cancel')};
-    const key=e=>{if(e.key==='Enter')submit();if(e.key==='Escape')cancel()};
-    function cleanup(){$('#authS').removeEventListener('click',submit);$('#authC').removeEventListener('click',cancel);$('#authP').removeEventListener('keydown',key)}
-    $('#authS').addEventListener('click',submit);$('#authC').addEventListener('click',cancel);$('#authP').addEventListener('keydown',key);
-  });
-}
+async function loginFlow(p){return p;}
+
 
 /* TRACK - Classic Ludo 52 cells */
 const TRACK=[];(function(){
@@ -516,7 +500,6 @@ class Engine{
             if(t){t.trackIndex=target; t.state='track';}
           }
           toast('⭐ Jota broke on Safe Star! Now singles');
-          continue;
         }
         for(const tid of jota.tokenIds){
         const t=player.tokens.find(x=>x.id===tid);
@@ -536,7 +519,20 @@ class Engine{
     if(this.consecutiveSixes>=3){extra=false;this.consecutiveSixes=0;toast('⚠️ 3x6 forfeit');}
     if(!extra&&!allFin){this.current=opp;}
     this.diceRolled=false;this.dice=null;
-    return{killed,capturedJota,extra,win:allFin,player:pk,jota:true};
+    return{killed,capturedJota,extra,win:allFin,player:pk,jota:true,movedSteps:moveDist,rolledDice:dice};
+  }
+
+  pass(){
+    if(this.winner)return{error:'Game over'};
+    if(!this.diceRolled)return{error:'Roll first'};
+    const pk=this.current,dice=this.dice;
+    const hasMove=this.getValid(pk,dice).length>0||this.getValidJotas(pk,dice).length>0;
+    if(hasMove)return{error:'Valid move ache — guti click koro'};
+    let extra=dice===6;
+    if(this.consecutiveSixes>=3){extra=false;this.consecutiveSixes=0;toast('⚠️ 3x6 forfeit - Master Rule');}
+    if(!extra)this.current=pk==='sultan'?'nuva':'sultan';
+    this.diceRolled=false;this.dice=null;
+    return{extra,player:pk};
   }
 
   getState(){return{players:{sultan:{tokens:this.players.sultan.tokens.map(t=>({id:t.id,state:t.state,trackIndex:t.trackIndex,homeStep:t.homeStep})),kills:this.players.sultan.kills,sixes:this.players.sultan.sixes,wins:this.players.sultan.wins},nuva:{tokens:this.players.nuva.tokens.map(t=>({id:t.id,state:t.state,trackIndex:t.trackIndex,homeStep:t.homeStep})),kills:this.players.nuva.kills,sixes:this.players.nuva.sixes,wins:this.players.nuva.wins}},current:this.current,dice:this.dice,diceRolled:this.diceRolled,consecutiveSixes:this.consecutiveSixes,winner:this.winner,ts:Date.now()}}
@@ -628,13 +624,37 @@ function highlightValid(game, dice){
 
 /* SYNC */
 class Sync{
-  constructor(game){this.game=game;this.ch=new BroadcastChannel('sn-ludo-v4');this.ch.onmessage=e=>this.handle(e.data);this.peer=null;this.conn=null;window.addEventListener('storage',e=>{if(e.key==='sn-state-v4'&&e.newValue){try{this.handle({type:'state',payload:JSON.parse(e.newValue),from:'storage'})}catch{}}})}
-  publish(){const s=this.game.getState();localStorage.setItem('sn-state-v4',JSON.stringify(s));this.ch.postMessage({type:'state',payload:s,from:this.id||'local'});if(this.conn&&this.conn.open){try{this.conn.send({type:'state',payload:s})}catch{}}}
+  constructor(game){
+    this.game=game;this.peer=null;this.conn=null;this.ch=null;
+    // BroadcastChannel is not available in every browser/webview. The game can
+    // still work through storage events and PeerJS when it is unavailable.
+    try{
+      if('BroadcastChannel' in window){
+        this.ch=new BroadcastChannel('sn-ludo-v4');
+        this.ch.onmessage=e=>this.handle(e.data);
+      }
+    }catch{}
+    window.addEventListener('storage',e=>{if(e.key==='sn-state-v4'&&e.newValue){try{this.handle({type:'state',payload:JSON.parse(e.newValue),from:'storage'})}catch{}}})
+  }
+  publish(){const s=this.game.getState();try{localStorage.setItem('sn-state-v4',JSON.stringify(s))}catch{}if(this.ch)this.ch.postMessage({type:'state',payload:s,from:this.id||'local'});if(this.conn&&this.conn.open){try{this.conn.send({type:'state',payload:s})}catch{}}}
   handle(msg){if(!msg||!msg.payload)return;if(msg.type==='state'){const inc=msg.payload;if(msg.from!==this.id){this.game.setState(inc);this.onState&&this.onState(inc);}else if(inc.ts>(this.game.getState().ts||0)){this.game.setState(inc);this.onState&&this.onState(inc)}}if(msg.type==='chat'){this.onChat&&this.onChat(msg.payload)}}
-  async initPeer(p){const fixed=`sn-ludo-${p}-main-v4`;try{this.peer=new Peer(fixed)}catch{this.peer=new Peer()}this.id=fixed;this.peer.on('open',id=>{this.id=id;$('#vConn').textContent=id.slice(-8);this.tryConnect()});this.peer.on('connection',c=>{this.conn=c;this.bind();toast('Peer connected');$('#vConn').textContent='connected'});this.peer.on('call',call=>{if(window._localStream){call.answer(window._localStream);this.handleCall(call)}else{navigator.mediaDevices.getUserMedia({audio:true}).then(s=>{window._localStream=s;call.answer(s);this.handleCall(call)})}});this.peer.on('error',()=>{setTimeout(()=>this.tryConnect(),2000)})}
+  async initPeer(p){
+    if(typeof Peer==='undefined'){
+      $('#vConn').textContent='local mode';
+      toast('Online server load hoyni — local mode e game cholbe');
+      return;
+    }
+    const fixed=`sn-ludo-${p}-main-v4`;
+    try{this.peer=new Peer(fixed)}catch{try{this.peer=new Peer()}catch{return}}
+    this.id=fixed;
+    this.peer.on('open',id=>{this.id=id;$('#vConn').textContent=id.slice(-8);this.tryConnect()});
+    this.peer.on('connection',c=>{this.conn=c;this.bind();toast('Peer connected');$('#vConn').textContent='connected'});
+    this.peer.on('call',call=>{if(window._localStream){call.answer(window._localStream);this.handleCall(call)}else if(navigator.mediaDevices){navigator.mediaDevices.getUserMedia({audio:true}).then(s=>{window._localStream=s;call.answer(s);this.handleCall(call)}).catch(()=>toast('Mic permission lagbe'))}});
+    this.peer.on('error',()=>{$('#vConn').textContent='reconnecting';setTimeout(()=>this.tryConnect(),2000)})
+  }
   tryConnect(){const other=this.id.includes('sultan')?'sn-ludo-nuva-main-v4':'sn-ludo-sultan-main-v4';if(this.peer&&this.peer.id!==other){try{const c=this.peer.connect(other);c.on('open',()=>{this.conn=c;this.bind();$('#vConn').textContent='connected';toast('Connected to '+(other.includes('sultan')?'Sultan':'Nuva'))})}catch{}}}
   bind(){if(!this.conn)return;this.conn.on('data',d=>{if(d.type==='state'){this.game.setState(d.payload);this.onState&&this.onState(d.payload)}if(d.type==='chat'){this.onChat&&this.onChat(d.payload)}});this.conn.on('close',()=>{$('#vConn').textContent='disconnected'})}
-  sendChat(m){localStorage.setItem('sn-chat-v4',JSON.stringify({...m,ts:Date.now()}));this.ch.postMessage({type:'chat',payload:m});if(this.conn&&this.conn.open)try{this.conn.send({type:'chat',payload:m})}catch{}}
+  sendChat(m){try{localStorage.setItem('sn-chat-v4',JSON.stringify({...m,ts:Date.now()}))}catch{}if(this.ch)this.ch.postMessage({type:'chat',payload:m});if(this.conn&&this.conn.open)try{this.conn.send({type:'chat',payload:m})}catch{}}
   async callVoice(stream){window._localStream=stream;const other=this.id.includes('sultan')?'sn-ludo-nuva-main-v4':'sn-ludo-sultan-main-v4';if(!this.peer)return;try{const call=this.peer.call(other,stream);this.handleCall(call)}catch{}}
   handleCall(call){call.on('stream',rs=>{let a=document.createElement('audio');a.srcObject=rs;a.autoplay=true;a.id='remoteAudio';document.body.appendChild(a);a.play().catch(()=>{});$('#vMic').textContent='voice connected';toast('Voice connected')});call.on('close',()=>{const a=$('#remoteAudio');if(a)a.remove();$('#vMic').textContent='call ended'})}
 }
@@ -655,7 +675,7 @@ function confetti(){
   const cv=$('#confetti');const ctx=cv.getContext('2d');cv.width=innerWidth;cv.height=innerHeight;const pcs=[];const cols=['#3b82f6','#a855f7','#facc15','#22c55e','#fff'];for(let i=0;i<150;i++)pcs.push({x:Math.random()*cv.width,y:Math.random()*cv.height-cv.height,r:Math.random()*7+3,c:cols[Math.floor(Math.random()*cols.length)],vx:(Math.random()-.5)*6,vy:Math.random()*3+2,rot:Math.random()*360,vr:(Math.random()-.5)*8});
   let raf;function draw(){ctx.clearRect(0,0,cv.width,cv.height);pcs.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.07;p.rot+=p.vr;if(p.y>cv.height+20)p.y=-20;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);ctx.fillStyle=p.c;ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r);ctx.restore()});raf=requestAnimationFrame(draw)}draw();setTimeout(()=>{cancelAnimationFrame(raf);ctx.clearRect(0,0,cv.width,cv.height)},4000);
 }
-let game,sync,chat,my=null,voiceStream=null,muted=false;
+let game,sync,chat,my=null,voiceStream=null,muted=false,started=false;
 function updateUI(){
   if(!game)return;
   renderTokens(game);
@@ -672,6 +692,8 @@ function updateUI(){
   if(sJotas.length>0){$('#jotaS').style.display='block';$('#jotaS').textContent=`🧱 Jota: ${sJotas.length} active - ${sJotas.map(j=>`[${j.tokenIds.map(i=>i+1).join('+')}@${j.trackIndex}]`).join(', ')}`;}else{$('#jotaS').style.display='none';}
   if(nJotas.length>0){$('#jotaN').style.display='block';$('#jotaN').textContent=`🧱 Jota: ${nJotas.length} active - ${nJotas.map(j=>`[${j.tokenIds.map(i=>i+1).join('+')}@${j.trackIndex}]`).join(', ')}`;}else{$('#jotaN').style.display='none';}
   if(sJotas.length>0||nJotas.length>0){$('#jotaInfo').style.display='inline-block';$('#jotaInfo').textContent=`🧱 ${sJotas.length+nJotas.length} Jota(s) Active`;$('#jotaMoveInfo').style.display='inline';}else{$('#jotaInfo').style.display='none';$('#jotaMoveInfo').style.display='none';}
+  // Pass is shown only after a rolled dice has no valid move.
+  $('#passBtn').classList.add('hidden');
 
   if(game.winner){
     $('#diceInfo').textContent=`Game Over! ${PLAYER_DEF[game.winner].name} jitse! Master Jota Mode`;
@@ -719,7 +741,7 @@ function bindEvents(){
     if(res.capturedJota){playS('kill');toast(`💥 Jota vs Jota capture!`);}
     else if(res.killed){playS('kill');toast(`${PLAYER_DEF[p].name} ke khaise! + extra turn`);}
     else if(res.finished){playS('home');toast('Home! Extra turn');}
-    else if(res.jota){playS('move');toast(`🧱 Jota moved ${game.dice}→${game.dice/2} squares`);}
+    else if(res.jota){playS('move');toast(`🧱 Jota moved ${res.rolledDice}→${res.movedSteps} squares`);}
     else{playS('move');}
     sync.publish();updateUI();
   });
@@ -728,9 +750,15 @@ function bindEvents(){
     if(game.diceRolled)return;
     const v=game.roll();$('#dice').classList.add('rolling');playS('dice');setTimeout(()=>{$('#dice').classList.remove('rolling');$('#dice').textContent=v},400);
     const singles=game.getValid(game.current,v);const jotas=game.getValidJotas(game.current,v);
-    if(singles.length===0&&jotas.length===0){setTimeout(()=>{toast(`No move ${v}, pass`);game.diceRolled=false;game.dice=null;game.current=game.current==='sultan'?'nuva':'sultan';sync.publish();updateUI()},800)}else{sync.publish();updateUI()}
+    sync.publish();updateUI();
+    if(singles.length===0&&jotas.length===0)toast(`No move for ${v} — Pass click koro`);
   });
-  $('#passBtn').addEventListener('click',()=>{game.diceRolled=false;game.dice=null;game.current=game.current==='sultan'?'nuva':'sultan';sync.publish();updateUI()});
+  $('#passBtn').addEventListener('click',()=>{
+    if(game.current!==my){toast('Tor turn na');return}
+    const res=game.pass();if(res.error){toast(res.error);return}
+    if(res.extra)toast('6 porse — extra roll');
+    sync.publish();updateUI();
+  });
   $('#soundBtn').addEventListener('click',()=>{soundOn=!soundOn;$('#soundBtn').textContent=soundOn?'🔊':'🔇';toast(soundOn?'Sound on':'Mute')});
   $('#restartBtn').addEventListener('click',()=>{if(confirm('Restart?')){game.reset();$('#winModal').dataset.shown='';sync.publish();updateUI()}});
   $('#againBtn').addEventListener('click',()=>{game.reset();$('#winModal').classList.add('hidden');$('#winModal').dataset.shown='';sync.publish();updateUI()});
@@ -743,7 +771,10 @@ function bindEvents(){
   $('#callBtn').addEventListener('click',async()=>{if(!voiceStream){try{const s=await navigator.mediaDevices.getUserMedia({audio:true});voiceStream=s;window._localStream=s}catch{toast('Mic lagbe');return}}sync.callVoice(voiceStream);toast('Calling...')});
 }
 async function start(p){
-  try{await loginFlow(p)}catch{return}
+  if(started)return;
+  started=true;
+  $('#cardS').disabled=true;$('#cardN').disabled=true;
+  try{await loginFlow(p)}catch{started=false;$('#cardS').disabled=false;$('#cardN').disabled=false;return}
   my=p;$('#welcomeScreen').classList.remove('active');$('#gameScreen').classList.add('active');
   game=new Engine();
   try{const sv=localStorage.getItem('sn-state-v4');if(sv)game.setState(JSON.parse(sv))}catch{}
@@ -754,8 +785,9 @@ async function start(p){
   const beat=()=>{localStorage.setItem(`sn-beat-${p}`,Date.now());const other=p==='sultan'?'nuva':'sultan';const ob=parseInt(localStorage.getItem(`sn-beat-${other}`)||'0');const online=Date.now()-ob<15000;$(`#status${other==='sultan'?'S':'N'}`).textContent=online?'Online':'Offline';$(`#status${p==='sultan'?'S':'N'}`).textContent='Online (You)'};setInterval(beat,2000);beat();
   toast(`Welcome ${PLAYER_DEF[p].name}! Jota Master Mode active - 2→1,4→2,6→3`);
 }
+window.start=start;
 $('#cardS').addEventListener('click',()=>start('sultan'));
 $('#cardN').addEventListener('click',()=>start('nuva'));
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f5840b8ad136c6',t:'MTc4NDc1NTUwMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
