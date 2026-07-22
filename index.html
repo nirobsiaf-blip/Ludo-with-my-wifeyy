@@ -3,15 +3,11 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>Sultan & Nuva • Private Ludo - Classic Board</title>
+<title>Sultan & Nuva • Private Ludo - Jota Master</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.3/dist/peerjs.min.js"></script>
 <style>
-:root{
-  --bg:#060713; --card:rgba(255,255,255,0.08); --border:rgba(255,255,255,0.12);
-  --blue:#3b82f6; --purple:#a855f7; --green:#22c55e; --yellow:#eab308; --red:#ef4444;
-  --text:#eef1ff; --muted:#9aa0c3; --radius:20px;
-}
+:root{--bg:#060713;--card:rgba(255,255,255,0.08);--border:rgba(255,255,255,0.12);--blue:#3b82f6;--purple:#a855f7;--text:#eef1ff;--muted:#9aa0c3}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 h1,h2,h3{font-family:'Space Grotesk',sans-serif}
@@ -23,7 +19,7 @@ h1,h2,h3{font-family:'Space Grotesk',sans-serif}
 #app{position:relative;z-index:1;min-height:100vh}
 .screen{min-height:100vh;display:none}.screen.active{display:flex}
 #welcomeScreen{align-items:center;justify-content:center;padding:20px}
-.welcome-card{width:100%;max-width:720px;border-radius:30px;padding:28px;text-align:center}
+.welcome-card{width:100%;max-width:760px;border-radius:30px;padding:28px;text-align:center}
 .badge{display:inline-block;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid var(--border);font-size:11px;letter-spacing:.15em;color:var(--muted);margin-bottom:14px}
 .logo{font-size:clamp(30px,7vw,54px);font-weight:800;line-height:.9;margin-bottom:8px}
 .logo span{background:linear-gradient(90deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
@@ -34,15 +30,12 @@ h1,h2,h3{font-family:'Space Grotesk',sans-serif}
 .player-card .ava{width:66px;height:66px;border-radius:18px;margin:0 auto 10px;display:grid;place-items:center;font-size:26px;font-weight:800;color:white}
 .ava.s{background:linear-gradient(135deg,#3b82f6,#1d4ed8);box-shadow:0 0 24px rgba(59,130,246,.5)}
 .ava.n{background:linear-gradient(135deg,#a855f7,#7e22ce);box-shadow:0 0 24px rgba(168,85,247,.5)}
-/* MODAL */
 .modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(3,4,15,.7);backdrop-filter:blur(16px)}
-.modal.hidden{display:none}.modal-card{width:100%;max-width:380px;border-radius:22px;padding:22px}
+.modal.hidden{display:none}.modal-card{width:100%;max-width:420px;border-radius:22px;padding:22px}
 .input{width:100%;padding:13px 15px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid var(--border);color:white;outline:none}
 .btn{padding:12px 18px;border-radius:12px;border:none;font-weight:700;cursor:pointer}
 .btn-p{background:linear-gradient(90deg,#3b82f6,#a855f7);color:white}
 .btn-g{background:rgba(255,255,255,.08);border:1px solid var(--border);color:white}
-
-/* GAME */
 #gameScreen{flex-direction:column}
 .topbar{height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 12px 0 16px;margin:10px;border-radius:16px;position:sticky;top:10px;z-index:10}
 .turn{padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid var(--border);font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
@@ -56,138 +49,64 @@ h1,h2,h3{font-family:'Space Grotesk',sans-serif}
 .stats{display:flex;gap:6px;margin-top:10px}
 .stat{flex:1;padding:8px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid var(--border);text-align:center}
 .stat b{display:block;font-size:16px}.stat span{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-
-/* CLASSIC BOARD */
 .board-col{display:flex;flex-direction:column;align-items:center;gap:10px}
 .board-wrap{width:100%;max-width:620px;aspect-ratio:1;border-radius:22px;padding:10px;background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.03));border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,.5)}
 .board-classic{width:100%;height:100%;display:grid;grid-template-columns:repeat(15,1fr);grid-template-rows:repeat(15,1fr);gap:0;background:#111;border-radius:12px;overflow:hidden;border:6px solid #1f1f2a;box-shadow:inset 0 0 0 2px rgba(255,255,255,.06)}
 .cell{position:relative;display:flex;align-items:center;justify-content:center}
-.cell.base-green{background:#1ea65c}
-.cell.base-yellow{background:#f7c948}
-.cell.base-red{background:#ef4444}
-.cell.base-purple{background:linear-gradient(135deg,#a855f7,#7e22ce)} /* Nuva - Top-Left */
-.cell.base-blue{background:linear-gradient(135deg,#3b82f6,#1d4ed8)} /* Sultan - Bottom-Right */
-.cell.base-inactive{opacity:.38;filter:saturate(.15);pointer-events:none}
+.cell.base-green{background:#1ea65c}.cell.base-yellow{background:#f7c948}.cell.base-red{background:#ef4444}
+.cell.base-purple{background:linear-gradient(135deg,#a855f7,#7e22ce)}
+.cell.base-blue{background:linear-gradient(135deg,#3b82f6,#1d4ed8)}
+.cell.base-inactive{opacity:.35;filter:saturate(.15);pointer-events:none}
 .cell.track{background:#ffffff;border:.5px solid #c9c9c9}
-.cell.track.safe{background:#ffffff}
-.cell.track.safe::after{content:'★';position:absolute;font-size:13px;color:#222;text-shadow:0 0 0}
-.cell.track.safe.green-star::after{color:#1ea65c}
-.cell.track.safe.yellow-star::after{color:#d9a600}
-.cell.track.safe.blue-star::after{color:#2563eb}
-.cell.track.safe.purple-star::after{color:#9333ea}
-.cell.home-purple{background:linear-gradient(180deg,#d8b4fe,#a855f7)}
-.cell.home-blue{background:linear-gradient(180deg,#93c5fd,#3b82f6)}
-.cell.home-green{background:#a7f3d0}
-.cell.home-yellow{background:#fde68a}
-.cell.home-red{background:linear-gradient(180deg,#fca5a5,#ef4444)}
-.cell.center-tri{position:relative;overflow:hidden}
-.tri{position:absolute;width:100%;height:100%}
-.tri-y{clip-path:polygon(0 0,100% 0,50% 50%);background:#a855f7} /* Nuva - Top - ACTIVE Purple */
-.tri-b{clip-path:polygon(100% 0,100% 100%,50% 50%);background:#f7c948;opacity:.4} /* Right inactive */
-.tri-r{clip-path:polygon(100% 100%,0 100%,50% 50%);background:#3b82f6} /* Sultan - Bottom - ACTIVE Blue */
-.tri-g{clip-path:polygon(0 100%,0 0,50% 50%);background:#22c55e;opacity:.4} /* Left inactive */
+.cell.track.safe::after{content:'★';position:absolute;font-size:13px;color:#222}
+.cell.track.safe.green-star::after{color:#1ea65c}.cell.track.safe.yellow-star::after{color:#d9a600}
+.cell.track.safe.blue-star::after{color:#2563eb}.cell.track.safe.purple-star::after{color:#9333ea}
+.cell.home-purple{background:linear-gradient(180deg,#d8b4fe,#a855f7)}.cell.home-blue{background:linear-gradient(180deg,#93c5fd,#3b82f6)}
+.cell.home-green{background:#a7f3d0}.cell.home-yellow{background:#fde68a}.cell.home-red{background:linear-gradient(180deg,#fca5a5,#ef4444)}
+.cell.center-tri{position:relative;overflow:hidden}.tri{position:absolute;width:100%;height:100%}
+.tri-y{clip-path:polygon(0 0,100% 0,50% 50%);background:#a855f7}
+.tri-b{clip-path:polygon(100% 0,100% 100%,50% 50%);background:#f7c948;opacity:.4}
+.tri-r{clip-path:polygon(100% 100%,0 100%,50% 50%);background:#3b82f6}
+.tri-g{clip-path:polygon(0 100%,0 0,50% 50%);background:#22c55e;opacity:.4}
 .center-logo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:38%;height:38%;background:white;border-radius:50%;display:grid;place-items:center;font-size:14px;border:3px solid #111;z-index:2}
-/* base spots */
 .spot{position:absolute;width:46%;height:46%;background:white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.25),inset 0 2px 3px rgba(0,0,0,.15);border:2px solid rgba(0,0,0,.1)}
 .spot::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:55%;height:55%;border-radius:50%}
-.base-green .spot::after{background:#1ea65c}
-.base-yellow .spot::after{background:#f7c948}
-.base-red .spot::after{background:#ef4444}
-.base-purple .spot::after{background:#a855f7}
-.base-blue .spot::after{background:#3b82f6}
-
-/* TOKENS - Beautiful Ludo King style */
-.token{
-  position:absolute;
-  width:74%;
-  height:86%;
-  left:13%;
-  top:4%;
-  border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;
-  border:3px solid white;
-  display:flex;
-  align-items:flex-start;
-  justify-content:center;
-  padding-top:5px;
-  font-weight:900;
-  font-size:14px;
-  color:white;
-  text-shadow:0 1px 3px rgba(0,0,0,.7);
-  cursor:pointer;
-  z-index:8;
-  transition:all .38s cubic-bezier(.34,1.56,.64,1);
-  box-shadow:0 6px 14px rgba(0,0,0,.45),0 0 0 1px rgba(0,0,0,.15),inset 0 6px 10px rgba(255,255,255,.7),inset 0 -8px 12px rgba(0,0,0,.35);
-}
-.token::before{
-  content:'';
-  position:absolute;
-  top:12%;
-  left:22%;
-  width:36%;
-  height:28%;
-  background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.9),transparent 70%);
-  border-radius:50%;
-  pointer-events:none;
-}
-.token::after{
-  content:'';
-  position:absolute;
-  bottom:-7px;
-  left:50%;
-  transform:translateX(-50%);
-  width:60%;
-  height:10px;
-  background:radial-gradient(ellipse,rgba(0,0,0,.35),transparent 70%);
-  border-radius:50%;
-  filter:blur(1px);
-}
-.token.sultan{
-  background:radial-gradient(circle at 35% 28%,#8fb8ff 0%,#3b82f6 35%,#1e40af 75%);
-}
-.token.nuva{
-  background:radial-gradient(circle at 35% 28%,#e9a7ff 0%,#a855f7 35%,#6b21a8 75%);
-}
-.token.at-base{
-  width:62%;
-  height:68%;
-  left:19%;
-  top:14%;
-}
-.token.stack-2{transform:translate(-60%,-60%) scale(.9);z-index:9}
-.token.stack-3{transform:translate(-40%,-60%) scale(.8);z-index:10}
-.token.stack-4{transform:translate(-50%,-40%) scale(.85);z-index:11}
-.token.valid{
-  animation:validPulse 1s infinite;
-  box-shadow:0 0 0 4px white,0 0 18px 6px rgba(255,255,255,.9),0 8px 20px rgba(0,0,0,.5);
-  transform:translate(-50%,-70%) scale(1.08);
-}
+.base-green .spot::after{background:#1ea65c}.base-yellow .spot::after{background:#f7c948}.base-red .spot::after{background:#ef4444}
+.base-purple .spot::after{background:#a855f7}.base-blue .spot::after{background:#3b82f6}
+.token{position:absolute;width:74%;height:86%;left:13%;top:4%;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;border:3px solid white;display:flex;align-items:flex-start;justify-content:center;padding-top:5px;font-weight:900;font-size:14px;color:white;text-shadow:0 1px 3px rgba(0,0,0,.7);cursor:pointer;z-index:8;transition:all .38s cubic-bezier(.34,1.56,.64,1);box-shadow:0 6px 14px rgba(0,0,0,.45),0 0 0 1px rgba(0,0,0,.15),inset 0 6px 10px rgba(255,255,255,.7),inset 0 -8px 12px rgba(0,0,0,.35)}
+.token::before{content:'';position:absolute;top:12%;left:22%;width:36%;height:28%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.9),transparent 70%);border-radius:50%;pointer-events:none}
+.token::after{content:'';position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);width:60%;height:10px;background:radial-gradient(ellipse,rgba(0,0,0,.35),transparent 70%);border-radius:50%;filter:blur(1px)}
+.token.sultan{background:radial-gradient(circle at 35% 28%,#8fb8ff 0%,#3b82f6 35%,#1e40af 75%)}
+.token.nuva{background:radial-gradient(circle at 35% 28%,#e9a7ff 0%,#a855f7 35%,#6b21a8 75%)}
+.token.at-base{width:62%;height:68%;left:19%;top:14%}
+.token.jota{box-shadow:0 0 0 3px gold,0 6px 14px rgba(0,0,0,.6),0 0 18px rgba(255,215,0,.7),inset 0 6px 10px rgba(255,255,255,.7)}
+.token.jota::after{content:'JOTA';position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font-size:8px;background:gold;color:#000;padding:1px 5px;border-radius:999px;font-weight:800;letter-spacing:.06em;width:auto;height:auto;filter:none}
+.token.stack-2{transform:translate(-60%,-60%) scale(.9);z-index:9}.token.stack-3{transform:translate(-40%,-60%) scale(.8);z-index:10}
+.token.valid{animation:validPulse 1s infinite;box-shadow:0 0 0 4px white,0 0 18px 6px rgba(255,255,255,.9),0 8px 20px rgba(0,0,0,.5);transform:translate(-50%,-70%) scale(1.08)}
+.token.valid-jota{animation:validJota 1s infinite;box-shadow:0 0 0 4px gold,0 0 22px 8px rgba(255,215,0,.9),0 8px 20px rgba(0,0,0,.6)}
 @keyframes validPulse{0%,100%{transform:translate(-50%,-60%) scale(1.06)}50%{transform:translate(-50%,-70%) scale(1.18)}}
+@keyframes validJota{0%,100%{transform:translate(-50%,-60%) scale(1.1)}50%{transform:translate(-50%,-75%) scale(1.25)}}
 .token.killed{animation:kill .5s forwards}
 @keyframes kill{0%{transform:translate(-50%,-60%) scale(1)}40%{transform:translate(-50%,-80%) scale(1.3) rotate(12deg)}100%{transform:translate(-50%,100%) scale(0) rotate(90deg);opacity:0}}
-.token.moving{z-index:20}
-
-/* dice etc */
 .dice-area{display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px;border-radius:18px;width:100%;max-width:620px}
 .dice-row{display:flex;gap:12px;align-items:center}
 .dice{width:62px;height:62px;border-radius:16px;background:linear-gradient(145deg,#fff,#e2e8f0);display:grid;place-items:center;font-size:30px;font-weight:900;color:#111;box-shadow:0 8px 18px rgba(0,0,0,.35),inset 0 2px 0 white}
 .dice.rolling{animation:roll .5s infinite}
 @keyframes roll{0%{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(1.15)}100%{transform:rotate(360deg) scale(1)}}
-.info{font-size:13px;color:var(--muted);line-height:1.4;max-width:220px}
-
-/* chat */
+.info{font-size:13px;color:var(--muted);line-height:1.45;max-width:280px}
 .right{display:flex;flex-direction:column;gap:10px}
 .chat-msgs{height:210px;overflow:auto;display:flex;flex-direction:column;gap:6px}
 .msg{max-width:84%;padding:9px 11px;border-radius:14px;font-size:13px;line-height:1.35}
-.msg.s{ align-self:flex-start;background:rgba(59,130,246,.18);border:1px solid rgba(59,130,246,.3);border-bottom-left-radius:6px }
-.msg.n{ align-self:flex-end;background:rgba(168,85,247,.20);border:1px solid rgba(168,85,247,.33);border-bottom-right-radius:6px }
+.msg.s{align-self:flex-start;background:rgba(59,130,246,.18);border:1px solid rgba(59,130,246,.3);border-bottom-left-radius:6px}
+.msg.n{align-self:flex-end;background:rgba(168,85,247,.20);border:1px solid rgba(168,85,247,.33);border-bottom-right-radius:6px}
 .chat-in{display:flex;gap:6px;margin-top:8px}
 .chat-in input{flex:1;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid var(--border);color:white;outline:none}
 .emoji{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
 .emo{width:30px;height:30px;border-radius:9px;background:rgba(255,255,255,.07);border:1px solid var(--border);display:grid;place-items:center;cursor:pointer}
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:200}
-.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);padding:10px 16px;border-radius:999px;background:rgba(0,0,0,.75);border:1px solid var(--border);color:white;font-size:13px;z-index:300}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);padding:10px 16px;border-radius:999px;background:rgba(0,0,0,.85);border:1px solid var(--border);color:white;font-size:13px;z-index:300;max-width:90%;text-align:center}
 .hidden{display:none !important}
-.kbd{font-size:10px;padding:2px 6px;border-radius:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.12)}
+.kbd{font-size:10px;padding:3px 7px;border-radius:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.12)}
 </style>
 </head>
 <body>
@@ -195,15 +114,26 @@ h1,h2,h3{font-family:'Space Grotesk',sans-serif}
 <div id="app">
 <section id="welcomeScreen" class="screen active">
 <div class="welcome-card glass">
-<div class="badge">🔒 PRIVATE • ONLY SULTAN & NUVA • MASTER MODE</div>
+<div class="badge">🔒 PRIVATE • SULTAN & NUVA • JOTA MASTER MODE</div>
 <h1 class="logo">Sultan <span>&</span> Nuva</h1>
-<p style="color:var(--muted);font-size:14px;margin-bottom:6px">Kunakuni Fix v2: Sultan bam-pase (Bottom-Left), Nuva upore-dane (Top-Right) — tomar kotha moto</p>
+<p style="color:var(--muted);font-size:14px;margin-bottom:6px">Kunakuni: Sultan bam (Bottom-Left Blue), Nuva upore-dan (Top-Right Purple)</p>
 <div class="players">
-<button class="player-card" id="cardS"><div class="ava s">S</div><h3>Sultan</h3><p style="color:var(--muted);font-size:12px">Blue • Bam Pasher Corner (Bottom-Left)</p></button>
-<button class="player-card" id="cardN"><div class="ava n">N</div><h3>Nuva</h3><p style="color:var(--muted);font-size:12px">Purple • Uporer Dan Corner (Top-Right) • Kunakuni</p></button>
+<button class="player-card" id="cardS"><div class="ava s">S</div><h3>Sultan</h3><p style="color:var(--muted);font-size:12px">Blue • Bam Corner (Bottom-Left)</p></button>
+<button class="player-card" id="cardN"><div class="ava n">N</div><h3>Nuva</h3><p style="color:var(--muted);font-size:12px">Purple • Upor Dan (Top-Right) • Kunakuni</p></button>
 </div>
-<p style="font-size:11px;color:var(--muted)">✅ Kunakuni Diagonal: Sultan (Bam) ↔ Nuva (Upor-Dan) Opposite • Classic Board</p>
-<div style="margin-top:10px"><span class="kbd">CLASSIC BOARD</span> <span class="kbd">BEAUTIFUL GUTI</span> <span class="kbd">MASTER RULE</span></div>
+<div style="margin-top:14px;text-align:left;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:14px;padding:14px;font-size:11px;line-height:1.6;color:var(--muted)">
+<b style="color:white;font-size:12px">🔥 Master Jota Rules (Active):</b><br/>
+🗡️ <b>Kill Requirement:</b> Home e dhukte age 1 ta opponent marte hobe<br/>
+💥 <b>Extra Turn:</b> 6 porle + extra, marle + extra<br/>
+🎲 <b>3x 6 Forfeit:</b> 3 bar por por 6 porle turn sesh<br/>
+🧱 <b>JOTA (Block):</b> Same ghor e 2 ta nijer guti = Jota auto form, ek sathe cholte hobe, vengge jabe na<br/>
+🚫 <b>Single vs Jota:</b> Single guti Jota ke marte/pass korte parbe na. Jota ke marte Jota lagbe<br/>
+💥 <b>Jota vs Jota:</b> Jota Jota ke marle opponent er 2 ta guti e basay<br/>
+📏 <b>Jota Move:</b> Dice er half — 2→1 ghor, 4→2 ghor, 6→3 ghor. 1,3,5 e Jota move korte parbe na<br/>
+🏠 <b>Jota Break:</b> ⭐ Stop / Safe Star ঘরে পৌঁছালে Jota ভেঙে দুটি আলাদা গুটি হবে (এর আগে কখনো ভাঙবে না)<br/>
+🛡️ <b>Safe ★:</b> Safe e capture hobe na
+</div>
+<div style="margin-top:10px"><span class="kbd">KILL TO HOME</span> <span class="kbd">JOTA BLOCK</span> <span class="kbd">2→1 4→2 6→3</span> <span class="kbd">KUNAKUNI</span></div>
 </div>
 </section>
 
@@ -212,6 +142,7 @@ h1,h2,h3{font-family:'Space Grotesk',sans-serif}
 <div style="display:flex;align-items:center;gap:10px">
 <div style="font-weight:800">SULTAN × NUVA</div>
 <div class="turn"><div class="dot"></div><span id="turnTxt">Sultan's Turn</span></div>
+<div id="jotaInfo" style="font-size:11px;padding:5px 10px;border-radius:999px;background:rgba(255,215,0,.15);border:1px solid rgba(255,215,0,.3);color:#ffd700;display:none">🧱 JOTA Active</div>
 </div>
 <div style="display:flex;gap:6px">
 <button class="btn btn-g" id="soundBtn">🔊</button>
@@ -223,38 +154,32 @@ h1,h2,h3{font-family:'Space Grotesk',sans-serif}
 <div class="panel glass" id="panelS">
 <div class="player-row"><div class="ava s">S</div><div><h4>Sultan</h4><p style="font-size:12px;color:var(--muted)"><span id="statusS">Offline</span> • <span id="winS">0 Wins</span></p></div></div>
 <div class="stats"><div class="stat"><b id="homeS">0</b><span>Home</span></div><div class="stat"><b id="killS">0</b><span>Kills</span></div><div class="stat"><b id="sixS">0</b><span>Sixes</span></div></div>
+<div id="jotaS" style="margin-top:8px;font-size:11px;color:gold;display:none">🧱 Jota: --</div>
 </div>
-
 <div class="board-col">
 <div class="board-wrap"><div class="board-classic" id="board"></div></div>
 <div class="dice-area glass">
-<div class="dice-row"><div class="dice" id="dice">—</div><div class="info" id="diceInfo">Roll koro. 6 porle guti ber hobe. Safe ★ e marte parba na.</div></div>
-<div style="display:flex;gap:8px"><button class="btn btn-p" id="rollBtn">🎲 Roll Dice</button><button class="btn btn-g hidden" id="passBtn">Pass</button></div>
+<div class="dice-row"><div class="dice" id="dice">—</div><div class="info" id="diceInfo">Roll koro. 6 porle guti ber hobe. Safe ★ e marte parba na. Jota = 2 guti ek ghor e.</div></div>
+<div style="display:flex;gap:8px;align-items:center"><button class="btn btn-p" id="rollBtn">🎲 Roll Dice</button><button class="btn btn-g hidden" id="passBtn">Pass</button><span id="jotaMoveInfo" style="font-size:11px;color:gold;display:none">Jota: 2→1 4→2 6→3</span></div>
 </div>
 </div>
-
 <div class="right">
 <div class="panel glass" id="panelN">
 <div class="player-row"><div class="ava n">N</div><div><h4>Nuva</h4><p style="font-size:12px;color:var(--muted)"><span id="statusN">Offline</span> • <span id="winN">0 Wins</span></p></div></div>
 <div class="stats"><div class="stat"><b id="homeN">0</b><span>Home</span></div><div class="stat"><b id="killN">0</b><span>Kills</span></div><div class="stat"><b id="sixN">0</b><span>Sixes</span></div></div>
+<div id="jotaN" style="margin-top:8px;font-size:11px;color:gold;display:none">🧱 Jota: --</div>
 </div>
-
 <div class="panel glass">
 <h4 style="font-size:12px;letter-spacing:.1em;color:var(--muted);margin-bottom:8px">🎙 VOICE • <span id="vConn" style="font-size:11px;text-transform:none">disconnected</span></h4>
-<div style="display:flex;gap:8px;align-items:center">
-<button class="btn btn-g" id="micBtn" style="flex:1">🎤 Mic On</button>
-<button class="btn btn-p" id="callBtn" style="flex:1">Call</button>
-</div>
+<div style="display:flex;gap:8px;align-items:center"><button class="btn btn-g" id="micBtn" style="flex:1">🎤 Mic On</button><button class="btn btn-p" id="callBtn" style="flex:1">Call</button></div>
 <p id="vMic" style="font-size:11px;color:var(--muted);margin-top:6px">mic off</p>
 </div>
-
 <div class="panel glass" style="flex:1;display:flex;flex-direction:column">
 <h4 style="font-size:12px;letter-spacing:.1em;color:var(--muted);margin-bottom:8px">💬 CHAT</h4>
 <div class="chat-msgs" id="chatMsgs"></div>
 <div class="chat-in"><input id="chatIn" placeholder="Message..."/><button class="btn btn-p" id="sendBtn">Send</button></div>
 <div class="emoji" id="emojiBar"></div>
 </div>
-
 <div class="panel glass"><h4 style="font-size:12px;letter-spacing:.1em;color:var(--muted);margin-bottom:8px">🏆 HISTORY</h4><div id="hist" style="font-size:12px;color:var(--muted)">No matches yet</div></div>
 </div>
 </div>
@@ -267,20 +192,18 @@ h1,h2,h3{font-family:'Space Grotesk',sans-serif}
 
 <script type="module">
 const $=s=>document.querySelector(s);
-const sleep=m=>new Promise(r=>setTimeout(r,m));
 async function hashP(s){const e=new TextEncoder().encode(s);const b=await crypto.subtle.digest('SHA-256',e);return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}
-function toast(m,ms=2800){let t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),400)},ms)}
+function toast(m,ms=3200){let t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),400)},ms)}
 function nowT(){return new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
 let audioCtx=null,soundOn=true;
 function playS(type='move'){if(!soundOn)return;try{if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);let f=440,d=0.14;if(type==='dice'){f=620;d=0.2;o.type='triangle'}else if(type==='kill'){f=180;d=.4;o.type='sawtooth'}else if(type==='home'){f=900;d=.3}else if(type==='win'){f=1200;d=.7}o.frequency.value=f;g.gain.setValueAtTime(.18,g.currentTime);g.gain.exponentialRampToValueAtTime(0.001,g.currentTime+d);o.start();o.stop(g.currentTime+d);}catch{}}
-/* AUTH */
 const AUTH_KEY='sn-ludo-auth-v3';
 const getAuth=()=>{try{return JSON.parse(localStorage.getItem(AUTH_KEY)||'{}')}catch{return{}}};
 const saveAuth=o=>localStorage.setItem(AUTH_KEY,JSON.stringify(o));
 async function loginFlow(p){
   const store=getAuth();const has=!!store[p];
   $('#authT').textContent=has?`Welcome back, ${p}`:`Set password for ${p}`;
-  $('#authD').textContent=has?`Password dao. Only tumra 2 jon khelte parba.`:`First time - ekta password set koro, porer bar same password lagbe.`;
+  $('#authD').textContent=has?`Password dao. Only tumra 2 jon khelte parba.`:`First time - ekta password set koro`;
   $('#authP').value='';$('#authModal').classList.remove('hidden');$('#authP').focus();
   return new Promise((res,rej)=>{
     const submit=async()=>{
@@ -296,28 +219,19 @@ async function loginFlow(p){
   });
 }
 
-/* GAME LOGIC - same Master but with new mapping for classic board */
-const TRACK=[];
-(function(){
-  const order=[
-    [6,1],[6,2],[6,3],[6,4],[6,5],
-    [5,6],[4,6],[3,6],[2,6],[1,6],[0,6],[0,7],[0,8],
-    [1,8],[2,8],[3,8],[4,8],[5,8],
-    [6,9],[6,10],[6,11],[6,12],[6,13],[6,14],
-    [7,14],[8,14],[8,13],[8,12],[8,11],[8,10],[8,9],
-    [9,8],[10,8],[11,8],[12,8],[13,8],[14,8],[14,7],[14,6],
-    [13,6],[12,6],[11,6],[10,6],[9,6],
-    [8,5],[8,4],[8,3],[8,2],[8,1],[8,0],[7,0],[6,0]
-  ];
+/* TRACK - Classic Ludo 52 cells */
+const TRACK=[];(function(){
+  const order=[[6,1],[6,2],[6,3],[6,4],[6,5],[5,6],[4,6],[3,6],[2,6],[1,6],[0,6],[0,7],[0,8],[1,8],[2,8],[3,8],[4,8],[5,8],[6,9],[6,10],[6,11],[6,12],[6,13],[6,14],[7,14],[8,14],[8,13],[8,12],[8,11],[8,10],[8,9],[9,8],[10,8],[11,8],[12,8],[13,8],[14,8],[14,7],[14,6],[13,6],[12,6],[11,6],[10,6],[9,6],[8,5],[8,4],[8,3],[8,2],[8,1],[8,0],[7,0],[6,0]];
   order.forEach(([r,c],i)=>TRACK.push({r,c,i}));
 })();
 const SAFE=new Set([0,8,13,21,26,34,39,47]);
 const PLAYER_DEF={
-  // User request: Sultan bam pasher corner (bottom-left), Nuva uporer dan (top-right) - Diagonal kunakuni
-  sultan:{name:'Sultan',color:'sultan',start:39,entry:38,homePath:[[13,7],[12,7],[11,7],[10,7],[9,7],[8,7]],baseSpots:[[10,1],[10,4],[13,1],[13,4]],baseRange:{r:[9,14],c:[0,5]}},
-  nuva:{name:'Nuva',color:'nuva',start:13,entry:12,homePath:[[1,7],[2,7],[3,7],[4,7],[5,7],[6,7]],baseSpots:[[1,10],[1,13],[4,10],[4,13]],baseRange:{r:[0,5],c:[9,14]}}
+  sultan:{name:'Sultan',color:'sultan',start:39,entry:38,homePath:[[13,7],[12,7],[11,7],[10,7],[9,7],[8,7]],baseSpots:[[10,1],[10,4],[13,1],[13,4]]},
+  nuva:{name:'Nuva',color:'nuva',start:13,entry:12,homePath:[[1,7],[2,7],[3,7],[4,7],[5,7],[6,7]],baseSpots:[[1,10],[1,13],[4,10],[4,13]]}
 };
+
 class Token{constructor(id,pk){this.id=id;this.player=pk;this.state='base';this.trackIndex=null;this.homeStep=-1}}
+
 class Engine{
   constructor(){
     this.players={
@@ -328,123 +242,320 @@ class Engine{
     this.load();
   }
   load(){try{const d=JSON.parse(localStorage.getItem('sn-stats-v3')||'{}');for(const k of ['sultan','nuva']){if(d[k]){this.players[k].kills=d[k].kills||0;this.players[k].sixes=d[k].sixes||0;this.players[k].wins=d[k].wins||0}}}catch{}}
-  save(){localStorage.setItem('sn-stats-v3',JSON.stringify({sultan:this.players.sultan,nuva:this.players.nuva,history:JSON.parse(localStorage.getItem('sn-stats-v3')||'{}').history||[]}))}
+  save(){localStorage.setItem('sn-stats-v3',JSON.stringify({sultan:this.players.sultan,nuva:this.players.nuva}))}
+
+  /* ===== JOTA SYSTEM ===== */
+  getJotasForPlayer(pk){
+    const player=this.players[pk];
+    const groups={};
+    for(const t of player.tokens){
+      if(t.state!=='track'||t.trackIndex==null)continue;
+      const idx=t.trackIndex;
+      if(!groups[idx])groups[idx]=[];
+      groups[idx].push(t);
+    }
+    const jotas=[];
+    for(const idx in groups){
+      const g=groups[idx];
+      if(g.length>=2){
+        for(let i=0;i+1<g.length;i+=2){
+          jotas.push({trackIndex:parseInt(idx), tokenIds:[g[i].id,g[i+1].id], tokens:[g[i],g[i+1]]});
+        }
+      }
+    }
+    return jotas;
+  }
+  isTokenInJota(token){
+    if(token.state!=='track')return null;
+    const jotas=this.getJotasForPlayer(token.player);
+    for(const j of jotas) if(j.tokenIds.includes(token.id)) return j;
+    return null;
+  }
+  getJotaAtTrack(pk, idx){
+    return this.getJotasForPlayer(pk).find(j=>j.trackIndex===idx)||null;
+  }
+  getAnyJotaAtTrack(idx){
+    for(const pk of ['sultan','nuva']){
+      const j=this.getJotaAtTrack(pk,idx);
+      if(j) return {player:pk, jota:j};
+    }
+    return null;
+  }
+  getOpponentJotaAtTrack(idx, myPk){
+    const opp=myPk==='sultan'?'nuva':'sultan';
+    return this.getJotaAtTrack(opp,idx);
+  }
+  getOpponentSinglesAtTrack(idx, myPk){
+    const opp=myPk==='sultan'?'nuva':'sultan';
+    const oppJotas=this.getJotasForPlayer(opp);
+    const jotaIds=new Set(); oppJotas.forEach(j=>j.tokenIds.forEach(id=>jotaIds.add(id)));
+    const res=[];
+    for(const t of this.players[opp].tokens){
+      if(t.state==='track'&&t.trackIndex===idx&&!jotaIds.has(t.id)) res.push(t);
+    }
+    return res;
+  }
+  getOwnSinglesAtTrack(idx, myPk){
+    const myJotas=this.getJotasForPlayer(myPk);
+    const jotaIds=new Set(); myJotas.forEach(j=>j.tokenIds.forEach(id=>jotaIds.add(id)));
+    const res=[];
+    for(const t of this.players[myPk].tokens){
+      if(t.state==='track'&&t.trackIndex===idx&&!jotaIds.has(t.id)) res.push(t);
+    }
+    return res;
+  }
+  hasOpponentJotaInPath(cur, steps, myPk){
+    for(let i=1;i<steps;i++){
+      const idx=(cur+i)%52;
+      if(SAFE.has(idx))continue;
+      if(this.getOpponentJotaAtTrack(idx,myPk)) return true;
+    }
+    return false;
+  }
+
+  /* ===== VALID MOVES ===== */
   getValid(pk,dice){
     if(dice==null)return[];
-    const player=this.players[pk];const opp=pk==='sultan'?'nuva':'sultan';const res=[];
+    const player=this.players[pk];
+    const res=[];
     for(const t of player.tokens){
       if(t.state==='finished')continue;
-      if(t.state==='base'){if(dice===6){const s=PLAYER_DEF[pk].start;if(!this.isBlocked(s,opp))res.push(t)}}
-      else if(t.state==='track'){
+      if(this.isTokenInJota(t))continue; // Jota tokens cannot move as single
+      if(t.state==='base'){
+        if(dice===6){
+          const s=PLAYER_DEF[pk].start;
+          // Cannot land on own Jota
+          if(this.getJotaAtTrack(pk,s))continue;
+          // Cannot land on opponent Jota (single cannot capture Jota)
+          const oppJota=this.getOpponentJotaAtTrack(s,pk);
+          if(oppJota && !SAFE.has(s))continue;
+          res.push(t);
+        }
+      }else if(t.state==='track'){
         const cur=t.trackIndex;const entry=PLAYER_DEF[pk].entry;
         const steps=(entry - cur + 52)%52;
-        if(cur===entry){if(dice<=6)res.push(t)}
-        else if(dice<=steps){const target=(cur+dice)%52;if(!this.isBlocked(target,opp))res.push(t)}
-        else{const exc=dice-steps-1;if(exc<6)res.push(t)}
+        if(cur===entry){
+          if(player.kills===0)continue;
+          const hs=dice-1;if(hs<0||hs>=6)continue;
+          res.push(t);
+        }else if(dice<=steps){
+          const target=(cur+dice)%52;
+          if(this.hasOpponentJotaInPath(cur,dice,pk))continue;
+          if(this.getJotaAtTrack(pk,target))continue; // own Jota block (would be 3)
+          const oppJota=this.getOpponentJotaAtTrack(target,pk);
+          if(oppJota && !SAFE.has(target))continue; // single cannot land on opponent Jota
+          res.push(t);
+        }else{
+          if(player.kills===0)continue;
+          const exc=dice-steps-1;if(exc<0||exc>=6)continue;
+          if(this.hasOpponentJotaInPath(cur,steps,pk))continue;
+          const oppJotaAtEntry=this.getOpponentJotaAtTrack(entry,pk);
+          if(oppJotaAtEntry && !SAFE.has(entry))continue;
+          res.push(t);
+        }
       }else if(t.state==='home'){
-        if(t.homeStep===5 && dice===1)res.push(t);
-        else if(t.homeStep+dice===6)res.push(t);
-        else if(t.homeStep+dice<6)res.push(t);
+        if(player.kills===0)continue;
+        const ns=t.homeStep+dice;
+        if(ns===6||ns<6)res.push(t);
       }
     }
     return res;
   }
-  isBlocked(idx,by){const p=this.players[by];let c=0;for(const t of p.tokens){if(t.state==='track'&&t.trackIndex===idx)c++;if(c>=2)return true}return false}
+
+  getValidJotas(pk,dice){
+    // NEW RULE: Jota breaks ONLY on Safe, not on Home. Half dice move.
+    if(dice==null||dice%2!==0)return[];
+    const moveDist=dice/2;
+    const player=this.players[pk];
+    const jotas=this.getJotasForPlayer(pk);
+    const res=[];
+    for(const jota of jotas){
+      const cur=jota.trackIndex;const entry=PLAYER_DEF[pk].entry;
+      const steps=(entry - cur + 52)%52;
+      // Jota cannot enter home - must break via safe first (per latest user rule)
+      if(cur===entry){
+        // At entry, would go home - BLOCKED, must break via safe first
+        continue;
+      }else if(moveDist<=steps){
+        const target=(cur+moveDist)%52;
+        if(this.hasOpponentJotaInPath(cur,moveDist,pk))continue;
+        if(this.getJotaAtTrack(pk,target))continue; // own Jota -> 4 tokens
+        if(this.getOwnSinglesAtTrack(target,pk).length>0)continue; // would be 3
+        const oppJota=this.getOpponentJotaAtTrack(target,pk);
+        if(oppJota){
+          if(SAFE.has(target))continue; // safe cannot be captured, but landing on safe with Jota will BREAK (not capture)
+          res.push({jota,moveDist,target,willEnterHome:false,captureJota:oppJota});
+        }else{
+          // Check if target is safe -> will break
+          const willBreakOnSafe=SAFE.has(target);
+          res.push({jota,moveDist,target,willEnterHome:false,willBreakOnSafe});
+        }
+      }else{
+        // Would enter home - NOT ALLOWED for Jota per new rule (must break via safe first)
+        // So Jota cannot enter home column directly
+        continue;
+      }
+    }
+    return res;
+  }
+
   isSafe(idx){return SAFE.has(idx)}
   tokensAt(idx){const r=[];for(const k of ['sultan','nuva'])for(const t of this.players[k].tokens)if(t.state==='track'&&t.trackIndex===idx)r.push(t);return r}
   roll(){const v=Math.floor(Math.random()*6)+1;this.dice=v;this.diceRolled=true;if(v===6){this.players[this.current].sixes++;this.consecutiveSixes++;}else this.consecutiveSixes=0;this.save();return v}
+
   move(tokenId,pk){
+    const token=this.players[pk].tokens.find(t=>t.id===tokenId);
+    if(token){
+      const j=this.isTokenInJota(token);
+      if(j) return this.moveJota(j,this.dice,pk);
+    }
     if(this.winner)return{error:'Game over'};if(pk!==this.current)return{error:'Not your turn'};if(!this.diceRolled)return{error:'Roll first'};
-    const player=this.players[pk];const token=player.tokens.find(t=>t.id===tokenId);const opp=pk==='sultan'?'nuva':'sultan';const dice=this.dice;
-    const valid=this.getValid(pk,dice).map(t=>t.id);if(!valid.includes(tokenId))return{error:'Invalid move'};
+    const player=this.players[pk];const dice=this.dice;
+    const valid=this.getValid(pk,dice).map(t=>t.id);
+    if(!valid.includes(tokenId)){
+      if(player.kills===0){
+        const cur=token.trackIndex;const entry=PLAYER_DEF[pk].entry;const steps=token.state==='track'? (entry - cur +52)%52 : -1;
+        if(token.state==='track' && (cur===entry || dice>steps)) return{error:'🗡️ Kill 1 opponent before entering home!'};
+      }
+      const cur=token.trackIndex;
+      if(cur!=null){
+        const target=(cur+dice)%52;
+        if(this.getOpponentJotaAtTrack(target,pk) && !SAFE.has(target)) return{error:'Single cannot capture Jota! Need your own Jota (2→1,4→2,6→3)'};
+        if(this.hasOpponentJotaInPath(cur,dice,pk)) return{error:'Cannot pass through opponent Jota! Jota is a blockade.'};
+      }
+      return{error:'Invalid move - Jota rules'};
+    }
     let killed=null,finished=false,extra=false;
     if(token.state==='base'){
       token.state='track';token.trackIndex=PLAYER_DEF[pk].start;
     }else if(token.state==='track'){
       const cur=token.trackIndex;const entry=PLAYER_DEF[pk].entry;const steps=(entry - cur + 52)%52;
       if(cur===entry){
-        const exc=dice-1;token.state='home';token.homeStep=exc;token.trackIndex=null;
+        token.state='home';token.homeStep=dice-1;token.trackIndex=null;
       }else if(dice<=steps){
         const target=(cur+dice)%52;
         if(!this.isSafe(target)){
-          const oppTokens=this.tokensAt(target).filter(t=>t.player!==pk);
-          if(oppTokens.length===1){killed=oppTokens[0];killed.state='base';killed.trackIndex=null;killed.homeStep=-1;player.kills++;extra=true;}
+          const oppSingles=this.getOpponentSinglesAtTrack(target,pk);
+          if(oppSingles.length===1){killed=oppSingles[0];killed.state='base';killed.trackIndex=null;killed.homeStep=-1;player.kills++;extra=true;}
         }
         token.trackIndex=target;
+        // Auto-form Jota if lands on own single
+        const ownSingles=this.getOwnSinglesAtTrack(target,pk);
+        if(ownSingles.length===1){
+          // Now we have 2 tokens same square -> forms Jota, will be detected next turn
+          toast(`🧱 Jota formed! 2 tokens same square - must move together (2→1,4→2,6→3)`);
+        }
       }else{
-        const exc=dice-steps-1;token.state='home';token.homeStep=exc;token.trackIndex=null;
+        token.state='home';token.homeStep=dice-steps-1;token.trackIndex=null;
       }
     }else if(token.state==='home'){
-      const cur=token.homeStep;
-      if(cur===5&&dice===1){token.state='finished';token.homeStep=6;finished=true;extra=true;}
-      else{const ns=cur+dice;if(ns===6){token.state='finished';token.homeStep=6;finished=true;extra=true;}else if(ns<6){token.homeStep=ns;}else return{error:'Need exact'}}
+      const ns=token.homeStep+dice;
+      if(ns===6){token.state='finished';token.homeStep=6;finished=true;extra=true;}
+      else token.homeStep=ns;
     }
     const allFin=player.tokens.every(t=>t.state==='finished');
     if(allFin){this.winner=pk;player.wins++;let h=[];try{h=JSON.parse(localStorage.getItem('sn-history')||'[]')}catch{}h.push({winner:pk,at:Date.now()});localStorage.setItem('sn-history',JSON.stringify(h.slice(-20)));this.save();}
     if(dice===6)extra=true;if(killed)extra=true;if(finished)extra=true;
-    if(this.consecutiveSixes>=3){extra=false;this.consecutiveSixes=0;toast('3 ta 6 por por! Turn sesh - Master Rule');}
+    if(this.consecutiveSixes>=3){extra=false;this.consecutiveSixes=0;toast('⚠️ 3x6 forfeit - Master Rule');}
+    if(!extra&&!allFin){this.current=pk==='sultan'?'nuva':'sultan';}
+    this.diceRolled=false;this.dice=null;
+    return{killed,finished,extra,win:allFin,player:pk};
+  }
+
+  moveJota(jota,dice,pk){
+    if(this.winner)return{error:'Game over'};if(pk!==this.current)return{error:'Not your turn'};if(!this.diceRolled)return{error:'Roll first'};
+    if(dice%2!==0)return{error:'Jota moves only on even: 2→1, 4→2, 6→3'};
+    const moveDist=dice/2;
+    const valid=this.getValidJotas(pk,dice);
+    if(!valid.some(v=>v.jota.trackIndex===jota.trackIndex))return{error:'Invalid Jota move'};
+    const player=this.players[pk];const opp=pk==='sultan'?'nuva':'sultan';
+    const cur=jota.trackIndex;const entry=PLAYER_DEF[pk].entry;const steps=(entry - cur +52)%52;
+    let killed=null,capturedJota=null,extra=false;
+
+    if(cur===entry){
+      const hs=moveDist-1;
+      for(const tid of jota.tokenIds){
+        const t=player.tokens.find(x=>x.id===tid);
+        if(t){t.state='home';t.homeStep=hs;t.trackIndex=null;}
+      }
+      toast(`🧱 Jota broken! Entered home column and split into singles`);
+    }else if(moveDist<=steps){
+      const target=(cur+moveDist)%52;
+      if(!this.isSafe(target)){
+        const oppJota=this.getOpponentJotaAtTrack(target,pk);
+        if(oppJota){
+          capturedJota=oppJota;
+          for(const tid of oppJota.tokenIds){
+            const ot=this.players[opp].tokens.find(x=>x.id===tid);
+            if(ot){ot.state='base';ot.trackIndex=null;ot.homeStep=-1;}
+          }
+          player.kills+=2;extra=true;
+          toast(`💥 Jota vs Jota capture! 2 opponent tokens sent home!`);
+        }else{
+          const oppSingles=this.getOpponentSinglesAtTrack(target,pk);
+          if(oppSingles.length>0){
+            killed=oppSingles[0];killed.state='base';killed.trackIndex=null;killed.homeStep=-1;player.kills++;extra=true;
+          }
+        }
+      }
+      for(const tid of jota.tokenIds){
+        const t=player.tokens.find(x=>x.id===tid);
+        if(t) t.trackIndex=target;
+      }
+    }else{
+      const exc=moveDist-steps-1;
+      for(const tid of jota.tokenIds){
+        const t=player.tokens.find(x=>x.id===tid);
+        if(t){t.state='home';t.homeStep=exc;t.trackIndex=null;}
+      }
+      toast(`🧱 Jota broken in home column! Now singles`);
+    }
+    const allFin=player.tokens.every(t=>t.state==='finished');
+    if(allFin){this.winner=pk;player.wins++;let h=[];try{h=JSON.parse(localStorage.getItem('sn-history')||'[]')}catch{}h.push({winner:pk,at:Date.now()});localStorage.setItem('sn-history',JSON.stringify(h.slice(-20)));this.save();}
+    if(dice===6)extra=true;if(killed||capturedJota)extra=true;
+    if(this.consecutiveSixes>=3){extra=false;this.consecutiveSixes=0;toast('⚠️ 3x6 forfeit');}
     if(!extra&&!allFin){this.current=opp;}
     this.diceRolled=false;this.dice=null;
-    return{killed,finished,extra,win:allFin,player:pk}
+    return{killed,capturedJota,extra,win:allFin,player:pk,jota:true};
   }
+
   getState(){return{players:{sultan:{tokens:this.players.sultan.tokens.map(t=>({id:t.id,state:t.state,trackIndex:t.trackIndex,homeStep:t.homeStep})),kills:this.players.sultan.kills,sixes:this.players.sultan.sixes,wins:this.players.sultan.wins},nuva:{tokens:this.players.nuva.tokens.map(t=>({id:t.id,state:t.state,trackIndex:t.trackIndex,homeStep:t.homeStep})),kills:this.players.nuva.kills,sixes:this.players.nuva.sixes,wins:this.players.nuva.wins}},current:this.current,dice:this.dice,diceRolled:this.diceRolled,consecutiveSixes:this.consecutiveSixes,winner:this.winner,ts:Date.now()}}
   setState(s){if(!s||!s.players)return;for(const pk of ['sultan','nuva']){const src=s.players[pk];if(!src)continue;this.players[pk].kills=src.kills||0;this.players[pk].sixes=src.sixes||0;this.players[pk].wins=src.wins||0;src.tokens.forEach((tt,i)=>{const t=this.players[pk].tokens[i];if(t){t.state=tt.state;t.trackIndex=tt.trackIndex;t.homeStep=tt.homeStep}})}if(s.current)this.current=s.current;if(s.hasOwnProperty('dice'))this.dice=s.dice;if(s.hasOwnProperty('diceRolled'))this.diceRolled=s.diceRolled;if(s.hasOwnProperty('consecutiveSixes'))this.consecutiveSixes=s.consecutiveSixes;if(s.winner!==undefined)this.winner=s.winner}
   reset(){for(const pk of ['sultan','nuva'])this.players[pk].tokens.forEach(t=>{t.state='base';t.trackIndex=null;t.homeStep=-1});this.current='sultan';this.dice=null;this.diceRolled=false;this.consecutiveSixes=0;this.winner=null}
 }
 
-/* BOARD RENDER - CLASSIC */
+/* BOARD */
 function createClassicBoard(){
   const board=$('#board');board.innerHTML='';
   for(let r=0;r<15;r++){
     for(let c=0;c<15;c++){
       const cell=document.createElement('div');cell.className='cell';cell.dataset.r=r;cell.dataset.c=c;
-      // KUNAKUNI v2: Sultan bam pasher (bottom-left) Blue, Nuva uporer dan (top-right) Purple - Diagonal as requested
-      if(r>=0&&r<=5&&c>=0&&c<=5){cell.classList.add('base-green','base-inactive')} // top-left inactive
-      else if(r>=0&&r<=5&&c>=9&&c<=14){cell.classList.add('base-purple')} // Nuva - Top-Right (uporer dan) ACTIVE
-      else if(r>=9&&r<=14&&c>=0&&c<=5){cell.classList.add('base-blue')} // Sultan - Bottom-Left (bam pasher) ACTIVE
-      else if(r>=9&&r<=14&&c>=9&&c<=14){cell.classList.add('base-red','base-inactive')} // bottom-right inactive
+      if(r>=0&&r<=5&&c>=0&&c<=5){cell.classList.add('base-green','base-inactive')}
+      else if(r>=0&&r<=5&&c>=9&&c<=14){cell.classList.add('base-purple')}
+      else if(r>=9&&r<=14&&c>=0&&c<=5){cell.classList.add('base-blue')}
+      else if(r>=9&&r<=14&&c>=9&&c<=14){cell.classList.add('base-red','base-inactive')}
       else{
         const isTrack=TRACK.some(t=>t.r===r&&t.c===c);
         if(isTrack){
           cell.classList.add('track');
-          const t=TRACK.find(t=>t.r===r&&t.c===c);if(t){cell.dataset.track=t.i;if(SAFE.has(t.i)){cell.classList.add('safe');// color star
-            if([0,39].includes(t.i))cell.classList.add('purple-star');
-            else if([8,47].includes(t.i))cell.classList.add('green-star');
-            else if([13].includes(t.i))cell.classList.add('yellow-star');
-            else cell.classList.add('blue-star');
-          }}
+          const tt=TRACK.find(t=>t.r===r&&t.c===c);if(tt){cell.dataset.track=tt.i;if(SAFE.has(tt.i)){cell.classList.add('safe');if([0,39].includes(tt.i))cell.classList.add('purple-star');else if([8,47].includes(tt.i))cell.classList.add('green-star');else if([13].includes(tt.i))cell.classList.add('yellow-star');else cell.classList.add('blue-star');}}
         }else{
-          // home paths - KUNAKUNI v2: Sultan bam (bottom-left) blue bottom-vertical, Nuva uporer dan purple top-vertical
-          if(r===7&&c>=1&&c<=6){cell.classList.add('home-green','base-inactive')} // left arm inactive
-          else if(r===7&&c>=8&&c<=13){cell.classList.add('home-yellow','base-inactive')} // right arm inactive
-          else if(c===7&&r>=1&&r<=5){cell.classList.add('home-purple')} // Nuva Top-Right home - ACTIVE (top vertical purple)
-          else if(c===7&&r>=9&&r<=13){cell.classList.add('home-blue')} // Sultan Bottom-Left home - ACTIVE (bottom vertical blue)
-          else if(r===7&&c===7){ /*center will be handled*/}
+          if(r===7&&c>=1&&c<=6){cell.classList.add('home-green','base-inactive')}
+          else if(r===7&&c>=8&&c<=13){cell.classList.add('home-yellow','base-inactive')}
+          else if(c===7&&r>=1&&r<=5){cell.classList.add('home-purple')}
+          else if(c===7&&r>=9&&r<=13){cell.classList.add('home-blue')}
           else if(r>=6&&r<=8&&c>=6&&c<=8){
-            // center triangles
             cell.classList.add('center-tri');
-            if(r===6&&c===7){cell.innerHTML='<div class="tri tri-y"></div>'}
-            else if(r===7&&c===8){cell.innerHTML='<div class="tri tri-b"></div>'}
-            else if(r===8&&c===7){cell.innerHTML='<div class="tri tri-r"></div>'}
-            else if(r===7&&c===6){cell.innerHTML='<div class="tri tri-g"></div>'}
-            else if(r===7&&c===7){cell.innerHTML='<div class="tri tri-y"></div><div class="tri tri-b"></div><div class="tri tri-r"></div><div class="tri tri-g"></div><div class="center-logo">🏠</div>'}
-          }else{
-            cell.style.background='rgba(255,255,255,.04)'
-          }
+            if(r===6&&c===7)cell.innerHTML='<div class="tri tri-y"></div>';
+            else if(r===7&&c===8)cell.innerHTML='<div class="tri tri-b"></div>';
+            else if(r===8&&c===7)cell.innerHTML='<div class="tri tri-r"></div>';
+            else if(r===7&&c===6)cell.innerHTML='<div class="tri tri-g"></div>';
+            else if(r===7&&c===7)cell.innerHTML='<div class="tri tri-y"></div><div class="tri tri-b"></div><div class="tri tri-r"></div><div class="tri tri-g"></div><div class="center-logo">🏠</div>';
+          }else cell.style.background='rgba(255,255,255,.04)';
         }
       }
-      // base spots - white circles inside base
-      const isBaseSpot=(r,c)=>{
-        // green spots
-        if((r===1&&c===1)||(r===1&&c===4)||(r===4&&c===1)||(r===4&&c===4))return true;
-        if((r===1&&c===10)||(r===1&&c===13)||(r===4&&c===10)||(r===4&&c===13))return true;
-        if((r===10&&c===1)||(r===10&&c===4)||(r===13&&c===1)||(r===13&&c===4))return true;
-        if((r===10&&c===10)||(r===10&&c===13)||(r===13&&c===10)||(r===13&&c===13))return true;
-        return false;
-      };
-      if(isBaseSpot(r,c)){
-        const sp=document.createElement('div');sp.className='spot';cell.appendChild(sp);
-      }
+      const isSpot=(r,c)=>{if((r===1&&c===1)||(r===1&&c===4)||(r===4&&c===1)||(r===4&&c===4))return true;if((r===1&&c===10)||(r===1&&c===13)||(r===4&&c===10)||(r===4&&c===13))return true;if((r===10&&c===1)||(r===10&&c===4)||(r===13&&c===1)||(r===13&&c===4))return true;if((r===10&&c===10)||(r===10&&c===13)||(r===13&&c===10)||(r===13&&c===13))return true;return false;};
+      if(isSpot(r,c)){const sp=document.createElement('div');sp.className='spot';cell.appendChild(sp);}
       board.appendChild(cell);
     }
   }
@@ -453,36 +564,53 @@ function renderTokens(game){
   document.querySelectorAll('.token').forEach(t=>t.remove());
   const board=$('#board');
   function cellAt(r,c){return board.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`)}
+  // First, get jotas to mark
+  const allJotas=game.getAllJotas();
+  const jotaPositions=new Set();
+  for(const pk of ['sultan','nuva']){for(const j of allJotas[pk]){jotaPositions.add(`${pk}-${j.trackIndex}`)}}
   for(const pk of ['sultan','nuva']){
     const def=PLAYER_DEF[pk];const player=game.players[pk];
     player.tokens.forEach(token=>{
       let r,c,parent;
-      if(token.state==='base'){
-        const [br,bc]=def.baseSpots[token.id];r=br;c=bc;parent=cellAt(r,c);
-      }else if(token.state==='track'){
-        const tr=TRACK[token.trackIndex];if(!tr)return;r=tr.r;c=tr.c;parent=cellAt(r,c);
-      }else if(token.state==='home'){
-        const hp=def.homePath[token.homeStep];if(!hp)return;[r,c]=hp;parent=cellAt(r,c);
-      }else if(token.state==='finished'){
-        r=7;c=7;parent=cellAt(7,7);
-      }
+      if(token.state==='base'){const [br,bc]=def.baseSpots[token.id];r=br;c=bc;parent=cellAt(r,c);}
+      else if(token.state==='track'){const tr=TRACK[token.trackIndex];if(!tr)return;r=tr.r;c=tr.c;parent=cellAt(r,c);}
+      else if(token.state==='home'){const hp=def.homePath[token.homeStep];if(!hp)return;[r,c]=hp;parent=cellAt(r,c);}
+      else if(token.state==='finished'){r=7;c=7;parent=cellAt(7,7);}
       if(!parent)return;
       const existing=parent.querySelectorAll('.token').length;
       const div=document.createElement('div');div.className=`token ${pk} ${token.state==='base'?'at-base':''}`;div.dataset.player=pk;div.dataset.id=token.id;div.textContent=token.id+1;
-      if(existing===1)div.classList.add('stack-2');
-      if(existing===2)div.classList.add('stack-3');
-      if(existing>=3)div.classList.add('stack-4');
+      // Jota visual
+      if(token.state==='track' && game.isTokenInJota(token)){div.classList.add('jota');}
+      if(existing===1)div.classList.add('stack-2');if(existing===2)div.classList.add('stack-3');
       parent.appendChild(div);
     });
   }
 }
-function highlightValid(game,ids){document.querySelectorAll('.token').forEach(el=>{el.classList.remove('valid');if(el.dataset.player===game.current){const id=parseInt(el.dataset.id);if(ids.includes(id))el.classList.add('valid')}})}
+function highlightValid(game, dice){
+  document.querySelectorAll('.token').forEach(el=>el.classList.remove('valid','valid-jota'));
+  if(!game.diceRolled||dice==null)return;
+  const pk=game.current;
+  const singles=game.getValid(pk,dice).map(t=>t.id);
+  const jotas=game.getValidJotas(pk,dice);
+  // Highlight singles
+  document.querySelectorAll(`.token[data-player="${pk}"]`).forEach(el=>{
+    const id=parseInt(el.dataset.id);
+    if(singles.includes(id) && !el.classList.contains('jota')) el.classList.add('valid');
+  });
+  // Highlight Jotas
+  for(const vj of jotas){
+    for(const tid of vj.jota.tokenIds){
+      const el=document.querySelector(`.token[data-player="${pk}"][data-id="${tid}"]`);
+      if(el) el.classList.add('valid-jota');
+    }
+  }
+}
 
 /* SYNC */
 class Sync{
   constructor(game){this.game=game;this.ch=new BroadcastChannel('sn-ludo-v4');this.ch.onmessage=e=>this.handle(e.data);this.peer=null;this.conn=null;window.addEventListener('storage',e=>{if(e.key==='sn-state-v4'&&e.newValue){try{this.handle({type:'state',payload:JSON.parse(e.newValue),from:'storage'})}catch{}}})}
   publish(){const s=this.game.getState();localStorage.setItem('sn-state-v4',JSON.stringify(s));this.ch.postMessage({type:'state',payload:s,from:this.id||'local'});if(this.conn&&this.conn.open){try{this.conn.send({type:'state',payload:s})}catch{}}}
-  handle(msg){if(!msg||!msg.payload)return;if(msg.type==='state'){const inc=msg.payload;const cur=this.game.getState();if(msg.from!==this.id){this.game.setState(inc);this.onState&&this.onState(inc);}else if(inc.ts>cur.ts){this.game.setState(inc);this.onState&&this.onState(inc)}}if(msg.type==='chat'){this.onChat&&this.onChat(msg.payload)}}
+  handle(msg){if(!msg||!msg.payload)return;if(msg.type==='state'){const inc=msg.payload;if(msg.from!==this.id){this.game.setState(inc);this.onState&&this.onState(inc);}else if(inc.ts>(this.game.getState().ts||0)){this.game.setState(inc);this.onState&&this.onState(inc)}}if(msg.type==='chat'){this.onChat&&this.onChat(msg.payload)}}
   async initPeer(p){const fixed=`sn-ludo-${p}-main-v4`;try{this.peer=new Peer(fixed)}catch{this.peer=new Peer()}this.id=fixed;this.peer.on('open',id=>{this.id=id;$('#vConn').textContent=id.slice(-8);this.tryConnect()});this.peer.on('connection',c=>{this.conn=c;this.bind();toast('Peer connected');$('#vConn').textContent='connected'});this.peer.on('call',call=>{if(window._localStream){call.answer(window._localStream);this.handleCall(call)}else{navigator.mediaDevices.getUserMedia({audio:true}).then(s=>{window._localStream=s;call.answer(s);this.handleCall(call)})}});this.peer.on('error',()=>{setTimeout(()=>this.tryConnect(),2000)})}
   tryConnect(){const other=this.id.includes('sultan')?'sn-ludo-nuva-main-v4':'sn-ludo-sultan-main-v4';if(this.peer&&this.peer.id!==other){try{const c=this.peer.connect(other);c.on('open',()=>{this.conn=c;this.bind();$('#vConn').textContent='connected';toast('Connected to '+(other.includes('sultan')?'Sultan':'Nuva'))})}catch{}}}
   bind(){if(!this.conn)return;this.conn.on('data',d=>{if(d.type==='state'){this.game.setState(d.payload);this.onState&&this.onState(d.payload)}if(d.type==='chat'){this.onChat&&this.onChat(d.payload)}});this.conn.on('close',()=>{$('#vConn').textContent='disconnected'})}
@@ -490,8 +618,6 @@ class Sync{
   async callVoice(stream){window._localStream=stream;const other=this.id.includes('sultan')?'sn-ludo-nuva-main-v4':'sn-ludo-sultan-main-v4';if(!this.peer)return;try{const call=this.peer.call(other,stream);this.handleCall(call)}catch{}}
   handleCall(call){call.on('stream',rs=>{let a=document.createElement('audio');a.srcObject=rs;a.autoplay=true;a.id='remoteAudio';document.body.appendChild(a);a.play().catch(()=>{});$('#vMic').textContent='voice connected';toast('Voice connected')});call.on('close',()=>{const a=$('#remoteAudio');if(a)a.remove();$('#vMic').textContent='call ended'})}
 }
-
-/* CHAT */
 class Chat{
   constructor(sync,my){this.sync=sync;this.my=my;this.msgs=[];this.load();this.render();this.bind();sync.onChat=(m)=>{if(this.msgs.some(x=>x.id===m.id))return;this.msgs.push(m);this.save();this.render();if(m.from!==my&&soundOn)playS('move')}}
   load(){try{this.msgs=JSON.parse(localStorage.getItem('sn-chat-msgs-v4')||'[]')}catch{this.msgs=[]}}
@@ -504,14 +630,10 @@ class Chat{
   }
   render(){const c=$('#chatMsgs');c.innerHTML='';this.msgs.slice(-80).forEach(m=>{const d=document.createElement('div');d.className=`msg ${m.from==='sultan'?'s':'n'}`;d.innerHTML=`<div>${m.text.replace(/</g,'&lt;')}</div><div style="font-size:10px;color:var(--muted);margin-top:3px">${m.from} • ${m.time}</div>`;c.appendChild(d)});c.scrollTop=c.scrollHeight}
 }
-
-/* CONFETTI */
 function confetti(){
   const cv=$('#confetti');const ctx=cv.getContext('2d');cv.width=innerWidth;cv.height=innerHeight;const pcs=[];const cols=['#3b82f6','#a855f7','#facc15','#22c55e','#fff'];for(let i=0;i<150;i++)pcs.push({x:Math.random()*cv.width,y:Math.random()*cv.height-cv.height,r:Math.random()*7+3,c:cols[Math.floor(Math.random()*cols.length)],vx:(Math.random()-.5)*6,vy:Math.random()*3+2,rot:Math.random()*360,vr:(Math.random()-.5)*8});
   let raf;function draw(){ctx.clearRect(0,0,cv.width,cv.height);pcs.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.07;p.rot+=p.vr;if(p.y>cv.height+20)p.y=-20;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);ctx.fillStyle=p.c;ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r);ctx.restore()});raf=requestAnimationFrame(draw)}draw();setTimeout(()=>{cancelAnimationFrame(raf);ctx.clearRect(0,0,cv.width,cv.height)},4000);
 }
-
-/* MAIN */
 let game,sync,chat,my=null,voiceStream=null,muted=false;
 function updateUI(){
   if(!game)return;
@@ -523,25 +645,47 @@ function updateUI(){
   $('#winS').textContent=game.players.sultan.wins+' Wins';$('#winN').textContent=game.players.nuva.wins+' Wins';
   const turnName=PLAYER_DEF[game.current].name;$('#turnTxt').textContent=game.winner?`${PLAYER_DEF[game.winner].name} Won!`:`${turnName}'s Turn`;
   $('#dice').textContent=game.dice||'—';
+  // Jota info
+  const allJotas=game.getAllJotas();
+  const sJotas=allJotas.sultan;const nJotas=allJotas.nuva;
+  if(sJotas.length>0){$('#jotaS').style.display='block';$('#jotaS').textContent=`🧱 Jota: ${sJotas.length} active - ${sJotas.map(j=>`[${j.tokenIds.map(i=>i+1).join('+')}@${j.trackIndex}]`).join(', ')}`;}else{$('#jotaS').style.display='none';}
+  if(nJotas.length>0){$('#jotaN').style.display='block';$('#jotaN').textContent=`🧱 Jota: ${nJotas.length} active - ${nJotas.map(j=>`[${j.tokenIds.map(i=>i+1).join('+')}@${j.trackIndex}]`).join(', ')}`;}else{$('#jotaN').style.display='none';}
+  if(sJotas.length>0||nJotas.length>0){$('#jotaInfo').style.display='inline-block';$('#jotaInfo').textContent=`🧱 ${sJotas.length+nJotas.length} Jota(s) Active`;$('#jotaMoveInfo').style.display='inline';}else{$('#jotaInfo').style.display='none';$('#jotaMoveInfo').style.display='none';}
+
   if(game.winner){
-    $('#diceInfo').textContent=`Game Over! ${PLAYER_DEF[game.winner].name} jitse! Master Mode`;
-    if(!$('#winModal').dataset.shown){$('#winModal').dataset.shown='1';$('#winT').textContent=`${PLAYER_DEF[game.winner].name} Wins!`;$('#winD').textContent=`Sob guti home chole geche - Master Mode victory!`;$('#winModal').classList.remove('hidden');confetti();playS('win')}
+    $('#diceInfo').textContent=`Game Over! ${PLAYER_DEF[game.winner].name} jitse! Master Jota Mode`;
+    if(!$('#winModal').dataset.shown){$('#winModal').dataset.shown='1';$('#winT').textContent=`${PLAYER_DEF[game.winner].name} Wins!`;$('#winD').textContent=`Master Jota victory! Kills: ${game.players[game.winner].kills}`;$('#winModal').classList.remove('hidden');confetti();playS('win')}
   }else if(!game.diceRolled){
-    const isMy=game.current===my;
-    $('#diceInfo').textContent=isMy?`Tor turn (${turnName}). Roll kor - 6 lagbe ber hote.`:`${turnName} vabche... kono timer nai, wait koro.`;
+    const isMy=game.current===my;const curP=game.players[game.current];
+    let msg=isMy?`Tor turn (${turnName}). Roll kor.`:`${turnName} vabche...`;
+    if(curP.kills===0) msg+=` ⚠️ Kill 1 to unlock home!`;
+    if(allJotas[game.current].length>0) msg+=` | 🧱 Jota: half dice (2→1,4→2,6→3), odd e move na`;
+    $('#diceInfo').textContent=msg;
   }else{
-    const valid=game.getValid(game.current,game.dice);
-    if(valid.length===0){$('#diceInfo').textContent=`${game.dice} porche kintu move nai. Pass hobe.`;$('#passBtn').classList.remove('hidden')}
-    else{$('#diceInfo').textContent=`${game.dice} porche. Alo jola guti te click kor.`;$('#passBtn').classList.add('hidden')}
+    const dice=game.dice;
+    const curP=game.players[game.current];
+    const singles=game.getValid(game.current,dice);
+    const jotas=game.getValidJotas(game.current,dice);
+    if(singles.length===0 && jotas.length===0){
+      let msg=`${dice} porche kintu kono move nai.`;
+      if(dice%2!==0 && allJotas[game.current].length>0) msg+=` Jota odd e move korte pare na (1,3,5 invalid).`;
+      if(curP.kills===0) msg+=` Home er jonno kill lagbe!`;
+      $('#diceInfo').textContent=msg;
+      $('#passBtn').classList.remove('hidden');
+    }else{
+      let parts=[];
+      if(singles.length>0) parts.push(`${singles.length} single`);
+      if(jotas.length>0) parts.push(`${jotas.length} Jota (half: ${dice}→${dice/2})`);
+      $('#diceInfo').textContent=`${dice} → Valid: ${parts.join(', ')}. Alo jola guti click kor.`;
+      $('#passBtn').classList.add('hidden');
+    }
   }
-  if(game.diceRolled&&game.dice){
-    const v=game.getValid(game.current,game.dice).map(t=>t.id);highlightValid(game,v);
-  }else document.querySelectorAll('.token').forEach(t=>t.classList.remove('valid'));
+  if(game.diceRolled) highlightValid(game, game.dice);
+  else document.querySelectorAll('.token').forEach(t=>t.classList.remove('valid','valid-jota'));
   $('#rollBtn').disabled=game.diceRolled||!!game.winner||game.current!==my;
   $('#rollBtn').textContent=game.diceRolled?'Wait...':'🎲 Roll Dice';
   const hist=JSON.parse(localStorage.getItem('sn-history')||'[]');const h=$('#hist');if(hist.length===0)h.textContent='No matches yet';else{h.innerHTML=hist.slice().reverse().slice(0,8).map(x=>`<div style="display:flex;justify-content:space-between;padding:6px 8px;background:rgba(255,255,255,.05);border-radius:8px;margin-bottom:4px"><span>🏆 ${PLAYER_DEF[x.winner].name}</span><span style="color:var(--muted)">${new Date(x.at).toLocaleTimeString()}</span></div>`).join('')}
 }
-
 function bindEvents(){
   $('#board').addEventListener('click',e=>{
     const tok=e.target.closest('.token');if(!tok)return;
@@ -550,32 +694,33 @@ function bindEvents(){
     if(p!==game.current){toast('Tor turn na');return}
     if(!game.diceRolled){toast('Age dice roll kor');return}
     const res=game.move(id,p);
-    if(res.error){toast(res.error);playS('kill');return}
-    if(res.killed){const el=document.querySelector(`.token[data-player="${res.killed.player}"][data-id="${res.killed.id}"]`);if(el)el.classList.add('killed');playS('kill');toast(`${PLAYER_DEF[p].name} ${PLAYER_DEF[res.killed.player].name} ke khaise!`)}
-    else if(res.finished){playS('home');toast('Guti home gelo! Extra turn')}
-    else{playS('move')}
+    if(res.error){toast(res.error,3500);playS('kill');return}
+    if(res.capturedJota){playS('kill');toast(`💥 Jota vs Jota capture!`);}
+    else if(res.killed){playS('kill');toast(`${PLAYER_DEF[p].name} ke khaise! + extra turn`);}
+    else if(res.finished){playS('home');toast('Home! Extra turn');}
+    else if(res.jota){playS('move');toast(`🧱 Jota moved ${game.dice}→${game.dice/2} squares`);}
+    else{playS('move');}
     sync.publish();updateUI();
   });
   $('#rollBtn').addEventListener('click',()=>{
     if(game.current!==my){toast('Tor turn na');return}
     if(game.diceRolled)return;
     const v=game.roll();$('#dice').classList.add('rolling');playS('dice');setTimeout(()=>{$('#dice').classList.remove('rolling');$('#dice').textContent=v},400);
-    const valid=game.getValid(game.current,v);
-    if(valid.length===0){setTimeout(()=>{toast(`No move ${v}, pass`);game.diceRolled=false;game.dice=null;game.current=game.current==='sultan'?'nuva':'sultan';sync.publish();updateUI()},800)}else{sync.publish();updateUI()}
+    const singles=game.getValid(game.current,v);const jotas=game.getValidJotas(game.current,v);
+    if(singles.length===0&&jotas.length===0){setTimeout(()=>{toast(`No move ${v}, pass`);game.diceRolled=false;game.dice=null;game.current=game.current==='sultan'?'nuva':'sultan';sync.publish();updateUI()},800)}else{sync.publish();updateUI()}
   });
   $('#passBtn').addEventListener('click',()=>{game.diceRolled=false;game.dice=null;game.current=game.current==='sultan'?'nuva':'sultan';sync.publish();updateUI()});
   $('#soundBtn').addEventListener('click',()=>{soundOn=!soundOn;$('#soundBtn').textContent=soundOn?'🔊':'🔇';toast(soundOn?'Sound on':'Mute')});
   $('#restartBtn').addEventListener('click',()=>{if(confirm('Restart?')){game.reset();$('#winModal').dataset.shown='';sync.publish();updateUI()}});
   $('#againBtn').addEventListener('click',()=>{game.reset();$('#winModal').classList.add('hidden');$('#winModal').dataset.shown='';sync.publish();updateUI()});
   $('#winClose').addEventListener('click',()=>$('#winModal').classList.add('hidden'));
-  $('#logoutBtn').addEventListener('click',()=>{if(confirm('Logout?')){location.reload()}});
+  $('#logoutBtn').addEventListener('click',()=>{if(confirm('Logout?'))location.reload()});
   $('#micBtn').addEventListener('click',async()=>{
     if(!voiceStream){try{const s=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});voiceStream=s;window._localStream=s;$('#micBtn').textContent='🎤 Muted?';$('#vMic').textContent='mic on';toast('Mic on');sync.callVoice(s)}catch{toast('Mic permission lagbe');return}}
     else{muted=!muted;voiceStream.getAudioTracks().forEach(t=>t.enabled=!muted);$('#micBtn').textContent=muted?'🔇 Muted':'🎤 Unmuted';$('#vMic').textContent=muted?'muted':'mic on'}
   });
   $('#callBtn').addEventListener('click',async()=>{if(!voiceStream){try{const s=await navigator.mediaDevices.getUserMedia({audio:true});voiceStream=s;window._localStream=s}catch{toast('Mic lagbe');return}}sync.callVoice(voiceStream);toast('Calling...')});
 }
-
 async function start(p){
   try{await loginFlow(p)}catch{return}
   my=p;$('#welcomeScreen').classList.remove('active');$('#gameScreen').classList.add('active');
@@ -586,11 +731,10 @@ async function start(p){
   chat=new Chat(sync,p);
   bindEvents();updateUI();
   const beat=()=>{localStorage.setItem(`sn-beat-${p}`,Date.now());const other=p==='sultan'?'nuva':'sultan';const ob=parseInt(localStorage.getItem(`sn-beat-${other}`)||'0');const online=Date.now()-ob<15000;$(`#status${other==='sultan'?'S':'N'}`).textContent=online?'Online':'Offline';$(`#status${p==='sultan'?'S':'N'}`).textContent='Online (You)'};setInterval(beat,2000);beat();
-  toast(`Welcome ${PLAYER_DEF[p].name}! Classic board ready — ekhon 100% playable`);
+  toast(`Welcome ${PLAYER_DEF[p].name}! Jota Master Mode active - 2→1,4→2,6→3`);
 }
-
 $('#cardS').addEventListener('click',()=>start('sultan'));
 $('#cardN').addEventListener('click',()=>start('nuva'));
 </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f5840b8ad136c6',t:'MTc4NDc1NTUwMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
