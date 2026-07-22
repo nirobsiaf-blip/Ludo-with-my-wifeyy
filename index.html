@@ -84,6 +84,11 @@ h1,h2,h3{font-family:'Space Grotesk',sans-serif}
 .token.stack-2{transform:translate(-60%,-60%) scale(.9);z-index:9}.token.stack-3{transform:translate(-40%,-60%) scale(.8);z-index:10}
 .token.valid{animation:validPulse 1s infinite;box-shadow:0 0 0 4px white,0 0 18px 6px rgba(255,255,255,.9),0 8px 20px rgba(0,0,0,.5);transform:translate(-50%,-70%) scale(1.08)}
 .token.valid-jota{animation:validJota 1s infinite;box-shadow:0 0 0 4px gold,0 0 22px 8px rgba(255,215,0,.9),0 8px 20px rgba(0,0,0,.6)}
+.move-options{position:absolute;left:50%;bottom:112%;transform:translateX(-50%);display:flex;gap:4px;padding:5px;background:rgba(5,7,20,.96);border:1px solid rgba(255,255,255,.3);border-radius:10px;z-index:50;box-shadow:0 8px 22px rgba(0,0,0,.65);white-space:nowrap}
+.move-options::after{content:'';position:absolute;left:50%;top:100%;transform:translateX(-50%);border:6px solid transparent;border-top-color:rgba(255,255,255,.3)}
+.move-choice{min-width:30px;height:30px;padding:0 7px;border:0;border-radius:8px;background:linear-gradient(135deg,#3b82f6,#a855f7);color:#fff;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,.35)}
+.move-choice:active{transform:scale(.92)}
+.dice-seq{font-size:15px!important;line-height:1.15;text-align:center;padding:4px}
 @keyframes validPulse{0%,100%{transform:translate(-50%,-60%) scale(1.06)}50%{transform:translate(-50%,-70%) scale(1.18)}}
 @keyframes validJota{0%,100%{transform:translate(-50%,-60%) scale(1.1)}50%{transform:translate(-50%,-75%) scale(1.25)}}
 .token.killed{animation:kill .5s forwards}
@@ -124,8 +129,9 @@ h1,h2,h3{font-family:'Space Grotesk',sans-serif}
 <div style="margin-top:14px;text-align:left;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:14px;padding:14px;font-size:11px;line-height:1.6;color:var(--muted)">
 <b style="color:white;font-size:12px">🔥 Master Jota Rules (Active):</b><br/>
 🗡️ <b>Kill Requirement:</b> Home e dhukte age 1 ta opponent marte hobe<br/>
-💥 <b>Extra Turn:</b> 6 porle + extra, marle + extra<br/>
-🎲 <b>3x 6 Forfeit:</b> 3 bar por por 6 porle turn sesh<br/>
+🎲 <b>Ludo Star Roll:</b> 6 porle guti na chaliye abar dice; saved chal nijer iccha moto use koro<br/>
+💥 <b>Extra Turn:</b> Marle saved chal seshe + bonus roll<br/>
+⚠️ <b>3x 6 Forfeit:</b> Por por 3 bar 6 porle sob saved chal cancel, turn sesh<br/>
 🧱 <b>JOTA (Block):</b> Same ghor e 2 ta nijer guti = Jota auto form, ek sathe cholte hobe, vengge jabe na<br/>
 🚫 <b>Single vs Jota:</b> Single guti Jota ke marte/pass korte parbe na. Jota ke marte Jota lagbe<br/>
 💥 <b>Jota vs Jota:</b> Jota Jota ke marle opponent er 2 ta guti e basay<br/>
@@ -194,6 +200,7 @@ h1,h2,h3{font-family:'Space Grotesk',sans-serif}
 </section>
 
 <div id="authModal" class="modal hidden"><div class="modal-card glass"><h3 id="authT">Welcome</h3><p style="color:var(--muted);font-size:13px;margin:8px 0 12px" id="authD"></p><input id="authP" type="password" class="input" placeholder="Password"/><div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-g" id="authC" style="flex:1">Cancel</button><button class="btn btn-p" id="authS" style="flex:1">Continue</button></div></div></div>
+<div id="reconnectModal" class="modal hidden"><div class="modal-card glass" style="text-align:center"><div style="font-size:44px;margin-bottom:6px">🔌</div><h3>Previous game disconnected</h3><p id="reconnectD" style="color:var(--muted);font-size:13px;line-height:1.5;margin:9px 0 15px">Purono game disconnect hoye gesilo. Abar shei jaygay fire jete chaw?</p><div style="display:flex;gap:8px"><button class="btn btn-p" id="reconnectYes" style="flex:1">Yes — Reconnect</button><button class="btn btn-g" id="reconnectNew" style="flex:1">New Game</button></div><p style="font-size:10px;color:var(--muted);margin-top:10px">New Game dile Sultan o Nuva—dujoner game reset hobe.</p></div></div>
 <div id="winModal" class="modal hidden"><div class="modal-card glass" style="text-align:center"><div style="font-size:48px">🎉</div><h2 id="winT">Sultan Wins!</h2><p id="winD" style="color:var(--muted);font-size:13px;margin-top:6px"></p><div style="display:flex;gap:8px;margin-top:16px"><button class="btn btn-g" id="winClose" style="flex:1">Close</button><button class="btn btn-p" id="againBtn" style="flex:1">Play Again</button></div></div></div>
 <canvas id="confetti"></canvas>
 </div>
@@ -231,6 +238,9 @@ class Engine{
       nuva:{key:'nuva',tokens:[0,1,2,3].map(i=>new Token(i,'nuva')),kills:0,sixes:0,wins:0}
     };
     this.current='sultan';this.dice=null;this.diceRolled=false;this.consecutiveSixes=0;this.winner=null;
+    // Ludo Star style turn: all rolled values stay here until the player uses them.
+    this.pendingRolls=[];this.bonusTurn=false;
+    this.sessionId=`sn-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;this.updatedAt=Date.now();
     this.load();
   }
   load(){try{const d=JSON.parse(localStorage.getItem('sn-stats-v3')||'{}');for(const k of ['sultan','nuva']){if(d[k]){this.players[k].kills=d[k].kills||0;this.players[k].sixes=d[k].sixes||0;this.players[k].wins=d[k].wins||0}}}catch{}}
@@ -396,16 +406,44 @@ class Engine{
 
   isSafe(idx){return SAFE.has(idx)}
   tokensAt(idx){const r=[];for(const k of ['sultan','nuva'])for(const t of this.players[k].tokens)if(t.state==='track'&&t.trackIndex===idx)r.push(t);return r}
-  roll(){const v=Math.floor(Math.random()*6)+1;this.dice=v;this.diceRolled=true;if(v===6){this.players[this.current].sixes++;this.consecutiveSixes++;}else this.consecutiveSixes=0;this.save();return v}
-
-  move(tokenId,pk){
-    const token=this.players[pk].tokens.find(t=>t.id===tokenId);
-    if(token){
-      const j=this.isTokenInJota(token);
-      if(j) return this.moveJota(j,this.dice,pk);
+  roll(){
+    if(this.winner)return{error:'Game over'};
+    if(this.diceRolled)return{error:'Age pending chal gulo complete koro'};
+    const v=Math.floor(Math.random()*6)+1;this.dice=v;
+    if(v===6){
+      this.players[this.current].sixes++;this.consecutiveSixes++;
+      if(this.consecutiveSixes>=3){
+        const cancelled=this.pendingRolls.concat(6);
+        this.pendingRolls=[];this.dice=null;this.diceRolled=false;this.consecutiveSixes=0;this.bonusTurn=false;
+        this.current=this.current==='sultan'?'nuva':'sultan';this.save();
+        return{value:v,thirdSix:true,cancelled};
+      }
+      this.pendingRolls.push(6);this.diceRolled=false;this.save();
+      return{value:v,rollAgain:true,pending:this.pendingRolls.slice()};
     }
+    this.pendingRolls.push(v);this.consecutiveSixes=0;this.diceRolled=true;this.save();
+    return{value:v,rollAgain:false,pending:this.pendingRolls.slice()};
+  }
+
+  hasAnyPendingMove(pk=this.current){
+    return [...new Set(this.pendingRolls)].some(d=>this.getValid(pk,d).length>0||this.getValidJotas(pk,d).length>0);
+  }
+  removePendingRoll(dice){const i=this.pendingRolls.indexOf(dice);if(i<0)return false;this.pendingRolls.splice(i,1);return true;}
+  finishMoveBatch(pk){
+    if(this.pendingRolls.length>0&&this.hasAnyPendingMove(pk)){this.diceRolled=true;this.dice=null;return false;}
+    this.pendingRolls=[];this.diceRolled=false;this.dice=null;this.consecutiveSixes=0;
+    const bonus=this.bonusTurn;this.bonusTurn=false;
+    if(!bonus&&!this.winner)this.current=pk==='sultan'?'nuva':'sultan';
+    return true;
+  }
+
+  move(tokenId,pk,chosenDice=null){
     if(this.winner)return{error:'Game over'};if(pk!==this.current)return{error:'Not your turn'};if(!this.diceRolled)return{error:'Roll first'};
-    const player=this.players[pk];const dice=this.dice;
+    const dice=chosenDice==null&&this.pendingRolls.length===1?this.pendingRolls[0]:Number(chosenDice);
+    if(!this.pendingRolls.includes(dice))return{error:'Upor theke ekta chal select koro'};
+    const token=this.players[pk].tokens.find(t=>t.id===tokenId);if(!token)return{error:'Token not found'};
+    const j=this.isTokenInJota(token);if(j)return this.moveJota(j,dice,pk);
+    const player=this.players[pk];this.dice=dice;
     const valid=this.getValid(pk,dice).map(t=>t.id);
     if(!valid.includes(tokenId)){
       if(player.kills===0){
@@ -433,13 +471,11 @@ class Engine{
           const oppSingles=this.getOpponentSinglesAtTrack(target,pk);
           if(oppSingles.length===1){killed=oppSingles[0];killed.state='base';killed.trackIndex=null;killed.homeStep=-1;player.kills++;extra=true;}
         }
+        // Check the destination before moving; checking afterwards includes the
+        // moving token itself and used to show a false “Jota formed” message.
+        const ownSingleWasHere=this.getOwnSinglesAtTrack(target,pk).length===1;
         token.trackIndex=target;
-        // Auto-form Jota if lands on own single
-        const ownSingles=this.getOwnSinglesAtTrack(target,pk);
-        if(ownSingles.length===1){
-          // Now we have 2 tokens same square -> forms Jota, will be detected next turn
-          toast(`🧱 Jota formed! 2 tokens same square - must move together (2→1,4→2,6→3)`);
-        }
+        if(ownSingleWasHere&&!SAFE.has(target))toast(`🧱 Jota formed! 2 tokens same square - must move together (2→1,4→2,6→3)`);
       }else{
         token.state='home';token.homeStep=dice-steps-1;token.trackIndex=null;
       }
@@ -450,11 +486,11 @@ class Engine{
     }
     const allFin=player.tokens.every(t=>t.state==='finished');
     if(allFin){this.winner=pk;player.wins++;let h=[];try{h=JSON.parse(localStorage.getItem('sn-history')||'[]')}catch{}h.push({winner:pk,at:Date.now()});localStorage.setItem('sn-history',JSON.stringify(h.slice(-20)));this.save();}
-    if(dice===6)extra=true;if(killed)extra=true;if(finished)extra=true;
-    if(this.consecutiveSixes>=3){extra=false;this.consecutiveSixes=0;toast('⚠️ 3x6 forfeit - Master Rule');}
-    if(!extra&&!allFin){this.current=pk==='sultan'?'nuva':'sultan';}
-    this.diceRolled=false;this.dice=null;
-    return{killed,finished,extra,win:allFin,player:pk};
+    // Six has already earned its extra roll during the rolling phase. A kill
+    // or reaching home grants one bonus roll after every saved value is used.
+    const bonusEarned=!!(killed||finished);if(bonusEarned)this.bonusTurn=true;
+    this.removePendingRoll(dice);const turnComplete=this.finishMoveBatch(pk);
+    return{killed,finished,extra:bonusEarned,bonusEarned,turnComplete,win:allFin,player:pk,usedDice:dice};
   }
 
   moveJota(jota,dice,pk){
@@ -515,29 +551,26 @@ class Engine{
     }
     const allFin=player.tokens.every(t=>t.state==='finished');
     if(allFin){this.winner=pk;player.wins++;let h=[];try{h=JSON.parse(localStorage.getItem('sn-history')||'[]')}catch{}h.push({winner:pk,at:Date.now()});localStorage.setItem('sn-history',JSON.stringify(h.slice(-20)));this.save();}
-    if(dice===6)extra=true;if(killed||capturedJota)extra=true;
-    if(this.consecutiveSixes>=3){extra=false;this.consecutiveSixes=0;toast('⚠️ 3x6 forfeit');}
-    if(!extra&&!allFin){this.current=opp;}
-    this.diceRolled=false;this.dice=null;
-    return{killed,capturedJota,extra,win:allFin,player:pk,jota:true,movedSteps:moveDist,rolledDice:dice};
+    const bonusEarned=!!(killed||capturedJota);if(bonusEarned)this.bonusTurn=true;
+    this.removePendingRoll(dice);const turnComplete=this.finishMoveBatch(pk);
+    return{killed,capturedJota,extra:bonusEarned,bonusEarned,turnComplete,win:allFin,player:pk,jota:true,movedSteps:moveDist,rolledDice:dice};
   }
 
   pass(){
     if(this.winner)return{error:'Game over'};
     if(!this.diceRolled)return{error:'Roll first'};
-    const pk=this.current,dice=this.dice;
-    const hasMove=this.getValid(pk,dice).length>0||this.getValidJotas(pk,dice).length>0;
-    if(hasMove)return{error:'Valid move ache — guti click koro'};
-    let extra=dice===6;
-    if(this.consecutiveSixes>=3){extra=false;this.consecutiveSixes=0;toast('⚠️ 3x6 forfeit - Master Rule');}
-    if(!extra)this.current=pk==='sultan'?'nuva':'sultan';
-    this.diceRolled=false;this.dice=null;
+    const pk=this.current;
+    if(this.hasAnyPendingMove(pk))return{error:'Valid move ache — guti click kore chal select koro'};
+    this.pendingRolls=[];this.diceRolled=false;this.dice=null;this.consecutiveSixes=0;
+    const extra=this.bonusTurn;this.bonusTurn=false;if(!extra)this.current=pk==='sultan'?'nuva':'sultan';
     return{extra,player:pk};
   }
 
-  getState(){return{players:{sultan:{tokens:this.players.sultan.tokens.map(t=>({id:t.id,state:t.state,trackIndex:t.trackIndex,homeStep:t.homeStep})),kills:this.players.sultan.kills,sixes:this.players.sultan.sixes,wins:this.players.sultan.wins},nuva:{tokens:this.players.nuva.tokens.map(t=>({id:t.id,state:t.state,trackIndex:t.trackIndex,homeStep:t.homeStep})),kills:this.players.nuva.kills,sixes:this.players.nuva.sixes,wins:this.players.nuva.wins}},current:this.current,dice:this.dice,diceRolled:this.diceRolled,consecutiveSixes:this.consecutiveSixes,winner:this.winner,ts:Date.now()}}
-  setState(s){if(!s||!s.players)return;for(const pk of ['sultan','nuva']){const src=s.players[pk];if(!src)continue;this.players[pk].kills=src.kills||0;this.players[pk].sixes=src.sixes||0;this.players[pk].wins=src.wins||0;src.tokens.forEach((tt,i)=>{const t=this.players[pk].tokens[i];if(t){t.state=tt.state;t.trackIndex=tt.trackIndex;t.homeStep=tt.homeStep}})}if(s.current)this.current=s.current;if(s.hasOwnProperty('dice'))this.dice=s.dice;if(s.hasOwnProperty('diceRolled'))this.diceRolled=s.diceRolled;if(s.hasOwnProperty('consecutiveSixes'))this.consecutiveSixes=s.consecutiveSixes;if(s.winner!==undefined)this.winner=s.winner}
-  reset(){for(const pk of ['sultan','nuva'])this.players[pk].tokens.forEach(t=>{t.state='base';t.trackIndex=null;t.homeStep=-1});this.current='sultan';this.dice=null;this.diceRolled=false;this.consecutiveSixes=0;this.winner=null}
+  touch(){this.updatedAt=Date.now()}
+  shouldAcceptState(s){if(!s||!s.players)return false;const incoming=Number(s.updatedAt||s.ts||0),mine=Number(this.updatedAt||0);return incoming>mine}
+  getState(){return{players:{sultan:{tokens:this.players.sultan.tokens.map(t=>({id:t.id,state:t.state,trackIndex:t.trackIndex,homeStep:t.homeStep})),kills:this.players.sultan.kills,sixes:this.players.sultan.sixes,wins:this.players.sultan.wins},nuva:{tokens:this.players.nuva.tokens.map(t=>({id:t.id,state:t.state,trackIndex:t.trackIndex,homeStep:t.homeStep})),kills:this.players.nuva.kills,sixes:this.players.nuva.sixes,wins:this.players.nuva.wins}},current:this.current,dice:this.dice,diceRolled:this.diceRolled,pendingRolls:this.pendingRolls.slice(),bonusTurn:this.bonusTurn,consecutiveSixes:this.consecutiveSixes,winner:this.winner,sessionId:this.sessionId,updatedAt:this.updatedAt,ts:this.updatedAt}}
+  setState(s){if(!s||!s.players)return;for(const pk of ['sultan','nuva']){const src=s.players[pk];if(!src)continue;this.players[pk].kills=src.kills||0;this.players[pk].sixes=src.sixes||0;this.players[pk].wins=src.wins||0;src.tokens.forEach((tt,i)=>{const t=this.players[pk].tokens[i];if(t){t.state=tt.state;t.trackIndex=tt.trackIndex;t.homeStep=tt.homeStep}})}if(s.current)this.current=s.current;if(s.hasOwnProperty('dice'))this.dice=s.dice;if(s.hasOwnProperty('diceRolled'))this.diceRolled=s.diceRolled;this.pendingRolls=Array.isArray(s.pendingRolls)?s.pendingRolls.slice():(s.diceRolled&&s.dice?[s.dice]:[]);this.bonusTurn=!!s.bonusTurn;if(s.hasOwnProperty('consecutiveSixes'))this.consecutiveSixes=s.consecutiveSixes;if(s.winner!==undefined)this.winner=s.winner;if(s.sessionId)this.sessionId=s.sessionId;this.updatedAt=Number(s.updatedAt||s.ts||this.updatedAt)}
+  reset(newSession=false){for(const pk of ['sultan','nuva']){this.players[pk].tokens.forEach(t=>{t.state='base';t.trackIndex=null;t.homeStep=-1});this.players[pk].kills=0;this.players[pk].sixes=0}this.current='sultan';this.dice=null;this.diceRolled=false;this.pendingRolls=[];this.bonusTurn=false;this.consecutiveSixes=0;this.winner=null;if(newSession)this.sessionId=`sn-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;this.touch();this.save()}
 }
 
 /* BOARD */
@@ -602,24 +635,36 @@ function renderTokens(game){
     });
   }
 }
-function highlightValid(game, dice){
+function highlightValid(game){
   document.querySelectorAll('.token').forEach(el=>el.classList.remove('valid','valid-jota'));
-  if(!game.diceRolled||dice==null)return;
-  const pk=game.current;
-  const singles=game.getValid(pk,dice).map(t=>t.id);
-  const jotas=game.getValidJotas(pk,dice);
-  // Highlight singles
+  if(!game.diceRolled||game.pendingRolls.length===0)return;
+  const pk=game.current,singleIds=new Set(),jotaIds=new Set();
+  for(const dice of [...new Set(game.pendingRolls)]){
+    game.getValid(pk,dice).forEach(t=>singleIds.add(t.id));
+    game.getValidJotas(pk,dice).forEach(v=>v.jota.tokenIds.forEach(id=>jotaIds.add(id)));
+  }
   document.querySelectorAll(`.token[data-player="${pk}"]`).forEach(el=>{
     const id=parseInt(el.dataset.id);
-    if(singles.includes(id) && !el.classList.contains('jota')) el.classList.add('valid');
+    if(jotaIds.has(id))el.classList.add('valid-jota');
+    else if(singleIds.has(id)&&!el.classList.contains('jota'))el.classList.add('valid');
   });
-  // Highlight Jotas
-  for(const vj of jotas){
-    for(const tid of vj.jota.tokenIds){
-      const el=document.querySelector(`.token[data-player="${pk}"][data-id="${tid}"]`);
-      if(el) el.classList.add('valid-jota');
-    }
+}
+function validDiceForToken(game,pk,id){
+  const token=game.players[pk].tokens.find(t=>t.id===id);if(!token)return[];
+  const inJota=game.isTokenInJota(token);const out=[];
+  for(const d of [...new Set(game.pendingRolls)]){
+    if(inJota){if(game.getValidJotas(pk,d).some(v=>v.jota.tokenIds.includes(id)))out.push(d);}
+    else if(game.getValid(pk,d).some(t=>t.id===id))out.push(d);
   }
+  return out;
+}
+function showMoveOptions(tokenEl,game){
+  document.querySelectorAll('.move-options').forEach(x=>x.remove());
+  const pk=tokenEl.dataset.player,id=parseInt(tokenEl.dataset.id),choices=validDiceForToken(game,pk,id);
+  if(!choices.length){toast('Ei gutir jonno kono valid chal nai');return}
+  const box=document.createElement('div');box.className='move-options';
+  choices.forEach(d=>{const b=document.createElement('button');b.type='button';b.className='move-choice';b.dataset.dice=d;b.textContent=d;box.appendChild(b)});
+  tokenEl.appendChild(box);
 }
 
 /* SYNC */
@@ -685,7 +730,9 @@ function updateUI(){
   $('#sixS').textContent=game.players.sultan.sixes;$('#sixN').textContent=game.players.nuva.sixes;
   $('#winS').textContent=game.players.sultan.wins+' Wins';$('#winN').textContent=game.players.nuva.wins+' Wins';
   const turnName=PLAYER_DEF[game.current].name;$('#turnTxt').textContent=game.winner?`${PLAYER_DEF[game.winner].name} Won!`:`${turnName}'s Turn`;
-  $('#dice').textContent=game.dice||'—';
+  const rollSeq=game.pendingRolls.slice();
+  $('#dice').textContent=rollSeq.length?rollSeq.join(' • '):(game.dice||'—');
+  $('#dice').classList.toggle('dice-seq',rollSeq.length>1);
   // Jota info
   const allJotas=game.getAllJotas();
   const sJotas=allJotas.sultan;const nJotas=allJotas.nuva;
@@ -699,64 +746,68 @@ function updateUI(){
     $('#diceInfo').textContent=`Game Over! ${PLAYER_DEF[game.winner].name} jitse! Master Jota Mode`;
     if(!$('#winModal').dataset.shown){$('#winModal').dataset.shown='1';$('#winT').textContent=`${PLAYER_DEF[game.winner].name} Wins!`;$('#winD').textContent=`Master Jota victory! Kills: ${game.players[game.winner].kills}`;$('#winModal').classList.remove('hidden');confetti();playS('win')}
   }else if(!game.diceRolled){
-    const isMy=game.current===my;const curP=game.players[game.current];
-    let msg=isMy?`Tor turn (${turnName}). Roll kor.`:`${turnName} vabche...`;
-    if(curP.kills===0) msg+=` ⚠️ Kill 1 to unlock home!`;
-    if(allJotas[game.current].length>0) msg+=` | 🧱 Jota: half dice (2→1,4→2,6→3), odd e move na`;
+    const isMy=game.current===my,curP=game.players[game.current];
+    let msg;
+    if(game.pendingRolls.length>0){
+      msg=isMy?`6 peyecho! Saved: [${game.pendingRolls.join(', ')}]. Guti chalanor age abar dice maro.`:`${turnName} abar dice marbe...`;
+    }else msg=isMy?`Tor turn (${turnName}). Roll kor.`:`${turnName} vabche...`;
+    if(curP.kills===0)msg+=` ⚠️ Kill 1 to unlock home!`;
+    if(allJotas[game.current].length>0)msg+=` | 🧱 Jota: 2→1, 4→2, 6→3`;
     $('#diceInfo').textContent=msg;
   }else{
-    const dice=game.dice;
-    const curP=game.players[game.current];
-    const singles=game.getValid(game.current,dice);
-    const jotas=game.getValidJotas(game.current,dice);
-    if(singles.length===0 && jotas.length===0){
-      let msg=`${dice} porche kintu kono move nai.`;
-      if(dice%2!==0 && allJotas[game.current].length>0) msg+=` Jota odd e move korte pare na (1,3,5 invalid).`;
-      if(curP.kills===0) msg+=` Home er jonno kill lagbe!`;
-      $('#diceInfo').textContent=msg;
+    const pending=game.pendingRolls.slice(),hasMove=game.hasAnyPendingMove(game.current);
+    if(!hasMove){
+      $('#diceInfo').textContent=`Saved chal [${pending.join(', ')}] diye kono move nai — Pass koro.`;
       $('#passBtn').classList.remove('hidden');
     }else{
-      let parts=[];
-      if(singles.length>0) parts.push(`${singles.length} single`);
-      if(jotas.length>0) parts.push(`${jotas.length} Jota (half: ${dice}→${dice/2})`);
-      $('#diceInfo').textContent=`${dice} → Valid: ${parts.join(', ')}. Alo jola guti click kor.`;
-      $('#passBtn').classList.add('hidden');
+      $('#diceInfo').textContent=`Saved: [${pending.join(', ')}]. Alo jola guti click koro, tarpor uporer chal number select koro.`;
     }
   }
-  if(game.diceRolled) highlightValid(game, game.dice);
+  if(game.diceRolled)highlightValid(game);
   else document.querySelectorAll('.token').forEach(t=>t.classList.remove('valid','valid-jota'));
   $('#rollBtn').disabled=game.diceRolled||!!game.winner||game.current!==my;
-  $('#rollBtn').textContent=game.diceRolled?'Wait...':'🎲 Roll Dice';
+  $('#rollBtn').textContent=game.diceRolled?'Chal baki...':(game.pendingRolls.length?'🎲 Roll Again':'🎲 Roll Dice');
   const hist=JSON.parse(localStorage.getItem('sn-history')||'[]');const h=$('#hist');if(hist.length===0)h.textContent='No matches yet';else{h.innerHTML=hist.slice().reverse().slice(0,8).map(x=>`<div style="display:flex;justify-content:space-between;padding:6px 8px;background:rgba(255,255,255,.05);border-radius:8px;margin-bottom:4px"><span>🏆 ${PLAYER_DEF[x.winner].name}</span><span style="color:var(--muted)">${new Date(x.at).toLocaleTimeString()}</span></div>`).join('')}
 }
 function bindEvents(){
+  const makeMove=(tok,dice)=>{
+    const p=tok.dataset.player,id=parseInt(tok.dataset.id);
+    const res=game.move(id,p,dice);
+    if(res.error){toast(res.error,3500);playS('kill');return}
+    if(res.capturedJota){playS('kill');toast(`💥 Jota vs Jota capture! Bonus roll paba.`);}
+    else if(res.killed){playS('kill');toast(`${PLAYER_DEF[p].name} khaise! Sob saved chal seshe bonus roll.`);}
+    else if(res.finished){playS('home');toast('Home! Sob saved chal seshe bonus roll.');}
+    else if(res.jota){playS('move');toast(`🧱 Jota moved ${res.rolledDice}→${res.movedSteps} squares`);}
+    else playS('move');
+    sync.publish();updateUI();
+    if(res.turnComplete&&game.current===p&&!res.win)toast('🎁 Bonus roll — abar dice maro');
+  };
   $('#board').addEventListener('click',e=>{
+    const choice=e.target.closest('.move-choice');
     const tok=e.target.closest('.token');if(!tok)return;
-    const p=tok.dataset.player;const id=parseInt(tok.dataset.id);
+    const p=tok.dataset.player;
     if(p!==my){toast('Eta tomar guti na');return}
     if(p!==game.current){toast('Tor turn na');return}
-    if(!game.diceRolled){toast('Age dice roll kor');return}
-    const res=game.move(id,p);
-    if(res.error){toast(res.error,3500);playS('kill');return}
-    if(res.capturedJota){playS('kill');toast(`💥 Jota vs Jota capture!`);}
-    else if(res.killed){playS('kill');toast(`${PLAYER_DEF[p].name} ke khaise! + extra turn`);}
-    else if(res.finished){playS('home');toast('Home! Extra turn');}
-    else if(res.jota){playS('move');toast(`🧱 Jota moved ${res.rolledDice}→${res.movedSteps} squares`);}
-    else{playS('move');}
-    sync.publish();updateUI();
+    if(!game.diceRolled){toast(game.pendingRolls.length?'6 peyecho — abar dice maro':'Age dice roll kor');return}
+    if(choice){e.stopPropagation();makeMove(tok,Number(choice.dataset.dice));return}
+    showMoveOptions(tok,game);
   });
   $('#rollBtn').addEventListener('click',()=>{
     if(game.current!==my){toast('Tor turn na');return}
-    if(game.diceRolled)return;
-    const v=game.roll();$('#dice').classList.add('rolling');playS('dice');setTimeout(()=>{$('#dice').classList.remove('rolling');$('#dice').textContent=v},400);
-    const singles=game.getValid(game.current,v);const jotas=game.getValidJotas(game.current,v);
+    if(game.diceRolled){toast('Age saved chal gulo complete koro');return}
+    const res=game.roll();if(res.error){toast(res.error);return}
+    const v=res.value;$('#dice').classList.add('rolling');playS('dice');
+    setTimeout(()=>{$('#dice').classList.remove('rolling');updateUI()},400);
+    if(res.thirdSix)toast(`⚠️ 3 bar 6! [${res.cancelled.join(', ')}] puro chal cancel — turn sesh`,4200);
+    else if(res.rollAgain)toast(`6 peyecho! Ekhon guti chalaio na — abar dice maro.`);
+    else if(!game.hasAnyPendingMove(game.current))toast(`Saved [${game.pendingRolls.join(', ')}] diye move nai — Pass koro`);
+    else toast(`Chal ready [${game.pendingRolls.join(', ')}] — guti click kore number select koro`);
     sync.publish();updateUI();
-    if(singles.length===0&&jotas.length===0)toast(`No move for ${v} — Pass click koro`);
   });
   $('#passBtn').addEventListener('click',()=>{
     if(game.current!==my){toast('Tor turn na');return}
     const res=game.pass();if(res.error){toast(res.error);return}
-    if(res.extra)toast('6 porse — extra roll');
+    if(res.extra)toast('Bonus roll — abar dice maro');
     sync.publish();updateUI();
   });
   $('#soundBtn').addEventListener('click',()=>{soundOn=!soundOn;$('#soundBtn').textContent=soundOn?'🔊':'🔇';toast(soundOn?'Sound on':'Mute')});
