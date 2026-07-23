@@ -50,7 +50,20 @@ h1,h2,h3{font-family:'Space Grotesk',sans-serif}
 .stat{flex:1;padding:8px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid var(--border);text-align:center}
 .stat b{display:block;font-size:16px}.stat span{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .board-col{display:flex;flex-direction:column;align-items:center;gap:10px}
-.board-wrap{width:100%;max-width:620px;aspect-ratio:1;border-radius:22px;padding:10px;background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.03));border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.board-stage{width:100%;max-width:740px;display:grid;grid-template-columns:minmax(0,620px) 108px;gap:9px;align-items:start;justify-content:center}
+.board-wrap{width:100%;max-width:none;aspect-ratio:1;border-radius:22px;padding:10px;background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.03));border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.move-panel{width:108px;min-height:190px;border-radius:17px;padding:10px 7px;text-align:center;display:flex;flex-direction:column;align-items:stretch;gap:7px;position:relative;z-index:12}
+.move-panel-title{font-size:10px;letter-spacing:.12em;color:var(--muted);font-weight:800}
+.move-panel-token{font-size:11px;line-height:1.3;color:white;min-height:29px;display:grid;place-items:center}
+.move-panel-choices{display:flex;flex-direction:column;gap:7px;align-items:stretch}
+.move-panel-empty{font-size:11px;color:var(--muted);padding:10px 2px;line-height:1.35}
+.move-choice{width:100%;height:38px;border:0;border-radius:10px;background:linear-gradient(135deg,#3b82f6,#a855f7);color:#fff;font-weight:900;font-size:17px;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.35)}
+.move-choice:active{transform:scale(.94)}
+.token.selected-token{box-shadow:0 0 0 4px #facc15,0 0 22px 8px rgba(250,204,21,.8),0 8px 20px rgba(0,0,0,.55)!important}
+@media(max-width:520px){
+  .board-stage{grid-template-columns:minmax(0,1fr) 78px;gap:5px}.board-wrap{padding:6px;border-radius:15px}.move-panel{width:78px;min-height:155px;padding:7px 5px;border-radius:13px}.move-choice{height:34px;font-size:15px}.move-panel-title{font-size:8px}.move-panel-token,.move-panel-empty{font-size:9px}
+  .topbar{height:auto;min-height:58px;padding:7px;gap:5px;flex-wrap:wrap}.topbar>div:first-child{gap:5px!important;flex-wrap:wrap;min-width:0;font-size:12px}.topbar .turn{padding:5px 8px;font-size:11px}.topbar .btn{padding:8px 10px}.topbar>div:last-child{gap:4px!important;margin-left:auto}
+}
 .board-classic{width:100%;height:100%;display:grid;grid-template-columns:repeat(15,1fr);grid-template-rows:repeat(15,1fr);gap:0;background:#111;border-radius:12px;overflow:hidden;border:6px solid #1f1f2a;box-shadow:inset 0 0 0 2px rgba(255,255,255,.06)}
 .cell{position:relative;display:flex;align-items:center;justify-content:center}
 .cell.base-green{background:#1ea65c}.cell.base-yellow{background:#f7c948}.cell.base-red{background:#ef4444}
@@ -84,10 +97,6 @@ h1,h2,h3{font-family:'Space Grotesk',sans-serif}
 .token.stack-2{transform:translate(-60%,-60%) scale(.9);z-index:9}.token.stack-3{transform:translate(-40%,-60%) scale(.8);z-index:10}
 .token.valid{animation:validPulse 1s infinite;box-shadow:0 0 0 4px white,0 0 18px 6px rgba(255,255,255,.9),0 8px 20px rgba(0,0,0,.5);transform:translate(-50%,-70%) scale(1.08)}
 .token.valid-jota{animation:validJota 1s infinite;box-shadow:0 0 0 4px gold,0 0 22px 8px rgba(255,215,0,.9),0 8px 20px rgba(0,0,0,.6)}
-.move-options{position:absolute;left:50%;bottom:112%;transform:translateX(-50%);display:flex;gap:4px;padding:5px;background:rgba(5,7,20,.96);border:1px solid rgba(255,255,255,.3);border-radius:10px;z-index:50;box-shadow:0 8px 22px rgba(0,0,0,.65);white-space:nowrap}
-.move-options::after{content:'';position:absolute;left:50%;top:100%;transform:translateX(-50%);border:6px solid transparent;border-top-color:rgba(255,255,255,.3)}
-.move-choice{min-width:30px;height:30px;padding:0 7px;border:0;border-radius:8px;background:linear-gradient(135deg,#3b82f6,#a855f7);color:#fff;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,.35)}
-.move-choice:active{transform:scale(.92)}
 .dice-seq{font-size:15px!important;line-height:1.15;text-align:center;padding:4px}
 @keyframes validPulse{0%,100%{transform:translate(-50%,-60%) scale(1.06)}50%{transform:translate(-50%,-70%) scale(1.18)}}
 @keyframes validJota{0%,100%{transform:translate(-50%,-60%) scale(1.1)}50%{transform:translate(-50%,-75%) scale(1.25)}}
@@ -163,8 +172,15 @@ h1,h2,h3{font-family:'Space Grotesk',sans-serif}
 <div id="jotaS" style="margin-top:8px;font-size:11px;color:gold;display:none">🧱 Jota: --</div>
 </div>
 <div class="board-col">
+<div class="board-stage">
 <div class="board-wrap"><div class="board-classic" id="board"></div></div>
-<div class="dice-area glass">
+<aside class="move-panel glass" id="movePanel" aria-label="Move selection panel">
+<div class="move-panel-title">🎯 CHAL SELECT</div>
+<div class="move-panel-token" id="movePanelToken">Guti select koro</div>
+<div class="move-panel-choices" id="movePanelChoices"><div class="move-panel-empty">Saved chal ekhane dekhabe</div></div>
+</aside>
+</div>
+<div class="dice-area glass" style="max-width:740px">
 <div class="dice-row"><div class="dice" id="dice">—</div><div class="info" id="diceInfo">Roll koro. 6 porle guti ber hobe. Safe ★ e marte parba na. Jota = 2 guti ek ghor e.</div></div>
 <div style="display:flex;gap:8px;align-items:center"><button class="btn btn-p" id="rollBtn">🎲 Roll Dice</button><button class="btn btn-g hidden" id="passBtn">Pass</button><span id="jotaMoveInfo" style="font-size:11px;color:gold;display:none">Jota: 2→1 4→2 6→3</span></div>
 </div>
@@ -200,7 +216,6 @@ h1,h2,h3{font-family:'Space Grotesk',sans-serif}
 </section>
 
 <div id="authModal" class="modal hidden"><div class="modal-card glass"><h3 id="authT">Welcome</h3><p style="color:var(--muted);font-size:13px;margin:8px 0 12px" id="authD"></p><input id="authP" type="password" class="input" placeholder="Password"/><div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-g" id="authC" style="flex:1">Cancel</button><button class="btn btn-p" id="authS" style="flex:1">Continue</button></div></div></div>
-<div id="reconnectModal" class="modal hidden"><div class="modal-card glass" style="text-align:center"><div style="font-size:44px;margin-bottom:6px">🔌</div><h3>Previous game disconnected</h3><p id="reconnectD" style="color:var(--muted);font-size:13px;line-height:1.5;margin:9px 0 15px">Purono game disconnect hoye gesilo. Abar shei jaygay fire jete chaw?</p><div style="display:flex;gap:8px"><button class="btn btn-p" id="reconnectYes" style="flex:1">Yes — Reconnect</button><button class="btn btn-g" id="reconnectNew" style="flex:1">New Game</button></div><p style="font-size:10px;color:var(--muted);margin-top:10px">New Game dile Sultan o Nuva—dujoner game reset hobe.</p></div></div>
 <div id="winModal" class="modal hidden"><div class="modal-card glass" style="text-align:center"><div style="font-size:48px">🎉</div><h2 id="winT">Sultan Wins!</h2><p id="winD" style="color:var(--muted);font-size:13px;margin-top:6px"></p><div style="display:flex;gap:8px;margin-top:16px"><button class="btn btn-g" id="winClose" style="flex:1">Close</button><button class="btn btn-p" id="againBtn" style="flex:1">Play Again</button></div></div></div>
 <canvas id="confetti"></canvas>
 </div>
@@ -240,11 +255,13 @@ class Engine{
     this.current='sultan';this.dice=null;this.diceRolled=false;this.consecutiveSixes=0;this.winner=null;
     // Ludo Star style turn: all rolled values stay here until the player uses them.
     this.pendingRolls=[];this.bonusTurn=false;
-    this.sessionId=`sn-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;this.updatedAt=Date.now();
+    // Persistent revision used to safely choose the newest board when two
+    // phones connect. Zero means this browser has no authoritative move yet.
+    this.updatedAt=0;this.updateId='';
     this.load();
   }
-  load(){try{const d=JSON.parse(localStorage.getItem('sn-stats-v3')||'{}');for(const k of ['sultan','nuva']){if(d[k]){this.players[k].kills=d[k].kills||0;this.players[k].sixes=d[k].sixes||0;this.players[k].wins=d[k].wins||0}}}catch{}}
-  save(){localStorage.setItem('sn-stats-v3',JSON.stringify({sultan:this.players.sultan,nuva:this.players.nuva}))}
+  load(){try{const d=JSON.parse(localStorage.getItem('sn-stats-v3')||'{}');for(const k of ['sultan','nuva'])if(d[k])this.players[k].wins=Number(d[k].wins)||0}catch{}}
+  save(){try{localStorage.setItem('sn-stats-v3',JSON.stringify({sultan:{wins:this.players.sultan.wins},nuva:{wins:this.players.nuva.wins}}))}catch{}}
 
   /* ===== JOTA SYSTEM ===== */
   getJotasForPlayer(pk){
@@ -485,7 +502,7 @@ class Engine{
       else token.homeStep=ns;
     }
     const allFin=player.tokens.every(t=>t.state==='finished');
-    if(allFin){this.winner=pk;player.wins++;let h=[];try{h=JSON.parse(localStorage.getItem('sn-history')||'[]')}catch{}h.push({winner:pk,at:Date.now()});localStorage.setItem('sn-history',JSON.stringify(h.slice(-20)));this.save();}
+    if(allFin){this.winner=pk;player.wins++;let h=[];try{h=JSON.parse(localStorage.getItem('sn-history')||'[]')}catch{}h.push({winner:pk,at:Date.now()});try{localStorage.setItem('sn-history',JSON.stringify(h.slice(-20)))}catch{}this.save();}
     // Six has already earned its extra roll during the rolling phase. A kill
     // or reaching home grants one bonus roll after every saved value is used.
     const bonusEarned=!!(killed||finished);if(bonusEarned)this.bonusTurn=true;
@@ -550,7 +567,7 @@ class Engine{
       toast(`🧱 Jota broken in home column! Now singles`);
     }
     const allFin=player.tokens.every(t=>t.state==='finished');
-    if(allFin){this.winner=pk;player.wins++;let h=[];try{h=JSON.parse(localStorage.getItem('sn-history')||'[]')}catch{}h.push({winner:pk,at:Date.now()});localStorage.setItem('sn-history',JSON.stringify(h.slice(-20)));this.save();}
+    if(allFin){this.winner=pk;player.wins++;let h=[];try{h=JSON.parse(localStorage.getItem('sn-history')||'[]')}catch{}h.push({winner:pk,at:Date.now()});try{localStorage.setItem('sn-history',JSON.stringify(h.slice(-20)))}catch{}this.save();}
     const bonusEarned=!!(killed||capturedJota);if(bonusEarned)this.bonusTurn=true;
     this.removePendingRoll(dice);const turnComplete=this.finishMoveBatch(pk);
     return{killed,capturedJota,extra:bonusEarned,bonusEarned,turnComplete,win:allFin,player:pk,jota:true,movedSteps:moveDist,rolledDice:dice};
@@ -566,11 +583,32 @@ class Engine{
     return{extra,player:pk};
   }
 
-  touch(){this.updatedAt=Date.now()}
-  shouldAcceptState(s){if(!s||!s.players)return false;const incoming=Number(s.updatedAt||s.ts||0),mine=Number(this.updatedAt||0);return incoming>mine}
-  getState(){return{players:{sultan:{tokens:this.players.sultan.tokens.map(t=>({id:t.id,state:t.state,trackIndex:t.trackIndex,homeStep:t.homeStep})),kills:this.players.sultan.kills,sixes:this.players.sultan.sixes,wins:this.players.sultan.wins},nuva:{tokens:this.players.nuva.tokens.map(t=>({id:t.id,state:t.state,trackIndex:t.trackIndex,homeStep:t.homeStep})),kills:this.players.nuva.kills,sixes:this.players.nuva.sixes,wins:this.players.nuva.wins}},current:this.current,dice:this.dice,diceRolled:this.diceRolled,pendingRolls:this.pendingRolls.slice(),bonusTurn:this.bonusTurn,consecutiveSixes:this.consecutiveSixes,winner:this.winner,sessionId:this.sessionId,updatedAt:this.updatedAt,ts:this.updatedAt}}
-  setState(s){if(!s||!s.players)return;for(const pk of ['sultan','nuva']){const src=s.players[pk];if(!src)continue;this.players[pk].kills=src.kills||0;this.players[pk].sixes=src.sixes||0;this.players[pk].wins=src.wins||0;src.tokens.forEach((tt,i)=>{const t=this.players[pk].tokens[i];if(t){t.state=tt.state;t.trackIndex=tt.trackIndex;t.homeStep=tt.homeStep}})}if(s.current)this.current=s.current;if(s.hasOwnProperty('dice'))this.dice=s.dice;if(s.hasOwnProperty('diceRolled'))this.diceRolled=s.diceRolled;this.pendingRolls=Array.isArray(s.pendingRolls)?s.pendingRolls.slice():(s.diceRolled&&s.dice?[s.dice]:[]);this.bonusTurn=!!s.bonusTurn;if(s.hasOwnProperty('consecutiveSixes'))this.consecutiveSixes=s.consecutiveSixes;if(s.winner!==undefined)this.winner=s.winner;if(s.sessionId)this.sessionId=s.sessionId;this.updatedAt=Number(s.updatedAt||s.ts||this.updatedAt)}
-  reset(newSession=false){for(const pk of ['sultan','nuva']){this.players[pk].tokens.forEach(t=>{t.state='base';t.trackIndex=null;t.homeStep=-1});this.players[pk].kills=0;this.players[pk].sixes=0}this.current='sultan';this.dice=null;this.diceRolled=false;this.pendingRolls=[];this.bonusTurn=false;this.consecutiveSixes=0;this.winner=null;if(newSession)this.sessionId=`sn-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;this.touch();this.save()}
+  touch(){this.updatedAt=Math.max(Date.now(),Number(this.updatedAt||0)+1);this.updateId=Math.random().toString(36).slice(2,12)}
+  shouldAcceptState(s){if(!s||!s.players)return false;const incoming=Number(s.updatedAt||s.ts||0),mine=Number(this.updatedAt||0);if(incoming!==mine)return incoming>mine;return String(s.updateId||'')>String(this.updateId||'')}
+  getState(){return{players:{sultan:{tokens:this.players.sultan.tokens.map(t=>({id:t.id,state:t.state,trackIndex:t.trackIndex,homeStep:t.homeStep})),kills:this.players.sultan.kills,sixes:this.players.sultan.sixes,wins:this.players.sultan.wins},nuva:{tokens:this.players.nuva.tokens.map(t=>({id:t.id,state:t.state,trackIndex:t.trackIndex,homeStep:t.homeStep})),kills:this.players.nuva.kills,sixes:this.players.nuva.sixes,wins:this.players.nuva.wins}},current:this.current,dice:this.dice,diceRolled:this.diceRolled,pendingRolls:this.pendingRolls.slice(),bonusTurn:this.bonusTurn,consecutiveSixes:this.consecutiveSixes,winner:this.winner,updatedAt:this.updatedAt,updateId:this.updateId,ts:this.updatedAt}}
+  setState(s){
+    if(!s||!s.players)return;
+    const states=new Set(['base','track','home','finished']);
+    for(const pk of ['sultan','nuva']){
+      const src=s.players[pk];if(!src||!Array.isArray(src.tokens))continue;
+      for(const stat of ['kills','sixes','wins']){const n=Number(src[stat]);if(Number.isFinite(n)&&n>=0)this.players[pk][stat]=Math.floor(n)}
+      src.tokens.slice(0,4).forEach((tt,i)=>{
+        const t=this.players[pk].tokens[i];if(!t||!tt||!states.has(tt.state))return;
+        t.state=tt.state;
+        t.trackIndex=Number.isInteger(tt.trackIndex)&&tt.trackIndex>=0&&tt.trackIndex<52?tt.trackIndex:null;
+        t.homeStep=Number.isInteger(tt.homeStep)&&tt.homeStep>=-1&&tt.homeStep<=6?tt.homeStep:-1;
+      });
+    }
+    if(['sultan','nuva'].includes(s.current))this.current=s.current;
+    this.dice=Number.isInteger(s.dice)&&s.dice>=1&&s.dice<=6?s.dice:null;
+    this.diceRolled=!!s.diceRolled;
+    this.pendingRolls=(Array.isArray(s.pendingRolls)?s.pendingRolls:(this.diceRolled&&this.dice?[this.dice]:[])).filter(v=>Number.isInteger(v)&&v>=1&&v<=6).slice(0,3);
+    this.bonusTurn=!!s.bonusTurn;
+    const cs=Number(s.consecutiveSixes);this.consecutiveSixes=Number.isInteger(cs)&&cs>=0&&cs<=2?cs:0;
+    this.winner=['sultan','nuva'].includes(s.winner)?s.winner:null;
+    this.updatedAt=Number(s.updatedAt||s.ts||this.updatedAt)||0;this.updateId=String(s.updateId||'').slice(0,24);
+  }
+  reset(){for(const pk of ['sultan','nuva']){this.players[pk].tokens.forEach(t=>{t.state='base';t.trackIndex=null;t.homeStep=-1});this.players[pk].kills=0;this.players[pk].sixes=0}this.current='sultan';this.dice=null;this.diceRolled=false;this.pendingRolls=[];this.bonusTurn=false;this.consecutiveSixes=0;this.winner=null;this.save()}
 }
 
 /* BOARD */
@@ -658,55 +696,107 @@ function validDiceForToken(game,pk,id){
   }
   return out;
 }
-function showMoveOptions(tokenEl,game){
-  document.querySelectorAll('.move-options').forEach(x=>x.remove());
-  const pk=tokenEl.dataset.player,id=parseInt(tokenEl.dataset.id),choices=validDiceForToken(game,pk,id);
-  if(!choices.length){toast('Ei gutir jonno kono valid chal nai');return}
-  const box=document.createElement('div');box.className='move-options';
+function renderMovePanel(game){
+  const title=$('#movePanelToken'),box=$('#movePanelChoices');if(!title||!box)return;
+  document.querySelectorAll('.token').forEach(el=>el.classList.remove('selected-token'));
+  box.innerHTML='';
+  if(selectedToken&&selectedToken.player!==game.current)selectedToken=null;
+  if(!game.diceRolled){
+    selectedToken=null;
+    title.textContent=game.pendingRolls.length?'Abar dice maro':'Guti select koro';
+    box.innerHTML=`<div class="move-panel-empty">${game.pendingRolls.length?'6 saved ache':'Saved chal ekhane dekhabe'}</div>`;return;
+  }
+  if(!selectedToken){title.textContent='Guti select koro';box.innerHTML='<div class="move-panel-empty">Board theke alo jola guti click koro</div>';return}
+  const {player,id}=selectedToken,choices=validDiceForToken(game,player,id);
+  const el=document.querySelector(`.token[data-player="${player}"][data-id="${id}"]`);if(el)el.classList.add('selected-token');
+  title.textContent=`${PLAYER_DEF[player].name} • Guti ${id+1}`;
+  if(!choices.length){box.innerHTML='<div class="move-panel-empty">Ei gutir valid chal nai. Onno guti select koro.</div>';return}
   choices.forEach(d=>{const b=document.createElement('button');b.type='button';b.className='move-choice';b.dataset.dice=d;b.textContent=d;box.appendChild(b)});
-  tokenEl.appendChild(box);
+}
+function selectTokenForMove(tokenEl,game){
+  const player=tokenEl.dataset.player,id=parseInt(tokenEl.dataset.id),choices=validDiceForToken(game,player,id);
+  if(!choices.length){toast('Ei gutir jonno kono valid chal nai');return}
+  selectedToken={player,id};renderMovePanel(game);
 }
 
 /* SYNC */
+function roomCode(){
+  const src=(location.host||'local-preview').toLowerCase();let h=2166136261;
+  for(let i=0;i<src.length;i++){h^=src.charCodeAt(i);h=Math.imul(h,16777619)}
+  return (h>>>0).toString(36);
+}
+const peerIdFor=p=>`sn-${roomCode()}-${p}-v5`;
 class Sync{
   constructor(game){
-    this.game=game;this.peer=null;this.conn=null;this.ch=null;
-    // BroadcastChannel is not available in every browser/webview. The game can
-    // still work through storage events and PeerJS when it is unavailable.
-    try{
-      if('BroadcastChannel' in window){
-        this.ch=new BroadcastChannel('sn-ludo-v4');
-        this.ch.onmessage=e=>this.handle(e.data);
-      }
-    }catch{}
-    window.addEventListener('storage',e=>{if(e.key==='sn-state-v4'&&e.newValue){try{this.handle({type:'state',payload:JSON.parse(e.newValue),from:'storage'})}catch{}}})
+    this.game=game;this.peer=null;this.conn=null;this.ch=null;this.player=null;
+    try{if('BroadcastChannel' in window){this.ch=new BroadcastChannel('sn-ludo-v5');this.ch.onmessage=e=>this.handle(e.data)}}catch{}
+    window.addEventListener('storage',e=>{if(e.key==='sn-state-v5'&&e.newValue){try{this.handle({type:'state',payload:JSON.parse(e.newValue)})}catch{}}})
   }
-  publish(){const s=this.game.getState();try{localStorage.setItem('sn-state-v4',JSON.stringify(s))}catch{}if(this.ch)this.ch.postMessage({type:'state',payload:s,from:this.id||'local'});if(this.conn&&this.conn.open){try{this.conn.send({type:'state',payload:s})}catch{}}}
-  handle(msg){if(!msg||!msg.payload)return;if(msg.type==='state'){const inc=msg.payload;if(msg.from!==this.id){this.game.setState(inc);this.onState&&this.onState(inc);}else if(inc.ts>(this.game.getState().ts||0)){this.game.setState(inc);this.onState&&this.onState(inc)}}if(msg.type==='chat'){this.onChat&&this.onChat(msg.payload)}}
-  async initPeer(p){
-    if(typeof Peer==='undefined'){
-      $('#vConn').textContent='local mode';
-      toast('Online server load hoyni — local mode e game cholbe');
-      return;
+  publish(){
+    this.game.touch();const state=this.game.getState();
+    try{localStorage.setItem('sn-state-v5',JSON.stringify(state))}catch{}
+    if(this.ch)try{this.ch.postMessage({type:'state',payload:state})}catch{}
+    if(this.conn&&this.conn.open)try{this.conn.send({type:'state',payload:state})}catch{}
+  }
+  sendSnapshot(){if(this.conn&&this.conn.open)try{this.conn.send({type:'state',payload:this.game.getState(),snapshot:true})}catch{}}
+  handle(msg){
+    if(!msg||!msg.payload)return;
+    if(msg.type==='state'&&this.game.shouldAcceptState(msg.payload)){
+      this.game.setState(msg.payload);try{localStorage.setItem('sn-state-v5',JSON.stringify(msg.payload))}catch{}
+      this.onState&&this.onState(msg.payload);
     }
-    const fixed=`sn-ludo-${p}-main-v4`;
-    try{this.peer=new Peer(fixed)}catch{try{this.peer=new Peer()}catch{return}}
-    this.id=fixed;
-    this.peer.on('open',id=>{this.id=id;$('#vConn').textContent=id.slice(-8);this.tryConnect()});
-    this.peer.on('connection',c=>{this.conn=c;this.bind();toast('Peer connected');$('#vConn').textContent='connected'});
-    this.peer.on('call',call=>{if(window._localStream){call.answer(window._localStream);this.handleCall(call)}else if(navigator.mediaDevices){navigator.mediaDevices.getUserMedia({audio:true}).then(s=>{window._localStream=s;call.answer(s);this.handleCall(call)}).catch(()=>toast('Mic permission lagbe'))}});
-    this.peer.on('error',()=>{$('#vConn').textContent='reconnecting';setTimeout(()=>this.tryConnect(),2000)})
+    if(msg.type==='chat')this.onChat&&this.onChat(msg.payload);
   }
-  tryConnect(){const other=this.id.includes('sultan')?'sn-ludo-nuva-main-v4':'sn-ludo-sultan-main-v4';if(this.peer&&this.peer.id!==other){try{const c=this.peer.connect(other);c.on('open',()=>{this.conn=c;this.bind();$('#vConn').textContent='connected';toast('Connected to '+(other.includes('sultan')?'Sultan':'Nuva'))})}catch{}}}
-  bind(){if(!this.conn)return;this.conn.on('data',d=>{if(d.type==='state'){this.game.setState(d.payload);this.onState&&this.onState(d.payload)}if(d.type==='chat'){this.onChat&&this.onChat(d.payload)}});this.conn.on('close',()=>{$('#vConn').textContent='disconnected'})}
-  sendChat(m){try{localStorage.setItem('sn-chat-v4',JSON.stringify({...m,ts:Date.now()}))}catch{}if(this.ch)this.ch.postMessage({type:'chat',payload:m});if(this.conn&&this.conn.open)try{this.conn.send({type:'chat',payload:m})}catch{}}
-  async callVoice(stream){window._localStream=stream;const other=this.id.includes('sultan')?'sn-ludo-nuva-main-v4':'sn-ludo-sultan-main-v4';if(!this.peer)return;try{const call=this.peer.call(other,stream);this.handleCall(call)}catch{}}
-  handleCall(call){call.on('stream',rs=>{let a=document.createElement('audio');a.srcObject=rs;a.autoplay=true;a.id='remoteAudio';document.body.appendChild(a);a.play().catch(()=>{});$('#vMic').textContent='voice connected';toast('Voice connected')});call.on('close',()=>{const a=$('#remoteAudio');if(a)a.remove();$('#vMic').textContent='call ended'})}
+  setConnection(c){
+    if(!c)return;this.conn=c;if(c.__snBound)return;c.__snBound=true;
+    c.on('data',d=>this.handle(d));
+    const lost=()=>{if(c.__snLost)return;c.__snLost=true;if(this.conn===c)this.conn=null;$('#vConn').textContent='disconnected';this.onPresence&&this.onPresence(false);if(this.player==='sultan')setTimeout(()=>this.tryConnect(),2200)};
+    c.on('close',lost);c.on('error',lost);
+    const ready=()=>{$('#vConn').textContent='connected';this.onPresence&&this.onPresence(true);this.sendSnapshot()};
+    if(c.open)ready();else c.on('open',ready);
+  }
+  async initPeer(p){
+    this.player=p;
+    if(typeof Peer==='undefined'){$('#vConn').textContent='local mode';toast('Online library load hoyni — internet check koro');return}
+    try{this.peer=new Peer(peerIdFor(p))}catch{$('#vConn').textContent='peer error';return}
+    this.peer.on('open',id=>{this.id=id;$('#vConn').textContent='connecting';this.tryConnect()});
+    this.peer.on('connection',c=>{this.setConnection(c);toast('Peer connected — game synced')});
+    this.peer.on('call',call=>{
+      if(window._localStream){call.answer(window._localStream);this.handleCall(call)}
+      else if(navigator.mediaDevices)navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{window._localStream=stream;call.answer(stream);this.handleCall(call)}).catch(()=>toast('Mic permission lagbe'));
+    });
+    this.peer.on('disconnected',()=>{try{this.peer.reconnect()}catch{}});
+    this.peer.on('error',err=>{
+      if(err&&err.type==='unavailable-id'){ $('#vConn').textContent='already open';toast(`${PLAYER_DEF[p].name} already onno tab/device e open ache`,4500);return }
+      $('#vConn').textContent='reconnecting';setTimeout(()=>this.tryConnect(),2200);
+    });
+  }
+  tryConnect(){
+    // Only Sultan initiates the data connection. Nuva listens. This avoids two
+    // crossed PeerJS connections fighting over which board state is current.
+    if(!this.peer||this.player!=='sultan'||this.conn&&this.conn.open)return;
+    const other=peerIdFor('nuva');
+    try{const c=this.peer.connect(other,{reliable:true});this.setConnection(c)}catch{}
+  }
+  sendChat(m){
+    try{localStorage.setItem('sn-chat-v5',JSON.stringify({...m,ts:Date.now()}))}catch{}
+    if(this.ch)try{this.ch.postMessage({type:'chat',payload:m})}catch{}
+    if(this.conn&&this.conn.open)try{this.conn.send({type:'chat',payload:m})}catch{}
+  }
+  async callVoice(stream){
+    window._localStream=stream;if(!this.peer||!this.player)return;
+    const other=peerIdFor(this.player==='sultan'?'nuva':'sultan');
+    try{const call=this.peer.call(other,stream);this.handleCall(call)}catch{}
+  }
+  handleCall(call){
+    call.on('stream',rs=>{let a=$('#remoteAudio');if(!a){a=document.createElement('audio');a.id='remoteAudio';a.autoplay=true;document.body.appendChild(a)}a.srcObject=rs;a.volume=Number($('#volBar').value||1);a.play().catch(()=>{});$('#vMic').textContent='voice connected';toast('Voice connected')});
+    call.on('close',()=>{const a=$('#remoteAudio');if(a)a.remove();$('#vMic').textContent='call ended'});
+  }
 }
 class Chat{
   constructor(sync,my){this.sync=sync;this.my=my;this.msgs=[];this.load();this.render();this.bind();sync.onChat=(m)=>{if(this.msgs.some(x=>x.id===m.id))return;this.msgs.push(m);this.save();this.render();if(m.from!==my&&soundOn)playS('move')}}
-  load(){try{this.msgs=JSON.parse(localStorage.getItem('sn-chat-msgs-v4')||'[]')}catch{this.msgs=[]}}
-  save(){localStorage.setItem('sn-chat-msgs-v4',JSON.stringify(this.msgs.slice(-150)))}
+  load(){try{this.msgs=JSON.parse(localStorage.getItem('sn-chat-msgs-v5')||localStorage.getItem('sn-chat-msgs-v4')||'[]')}catch{this.msgs=[]}}
+  save(){try{localStorage.setItem('sn-chat-msgs-v5',JSON.stringify(this.msgs.slice(-150)))}catch{}}
   bind(){
     const emojis=['😊','😂','❤️','🔥','🎲','😍','🥺','😎','👏','😭','💜','💙','✨','😘','🤞','🎉'];
     const bar=$('#emojiBar');bar.innerHTML='';emojis.forEach(e=>{const b=document.createElement('div');b.className='emo';b.textContent=e;b.onclick=()=>{const inp=$('#chatIn');inp.value+=e;inp.focus()};bar.appendChild(b)});
@@ -720,7 +810,7 @@ function confetti(){
   const cv=$('#confetti');const ctx=cv.getContext('2d');cv.width=innerWidth;cv.height=innerHeight;const pcs=[];const cols=['#3b82f6','#a855f7','#facc15','#22c55e','#fff'];for(let i=0;i<150;i++)pcs.push({x:Math.random()*cv.width,y:Math.random()*cv.height-cv.height,r:Math.random()*7+3,c:cols[Math.floor(Math.random()*cols.length)],vx:(Math.random()-.5)*6,vy:Math.random()*3+2,rot:Math.random()*360,vr:(Math.random()-.5)*8});
   let raf;function draw(){ctx.clearRect(0,0,cv.width,cv.height);pcs.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.07;p.rot+=p.vr;if(p.y>cv.height+20)p.y=-20;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);ctx.fillStyle=p.c;ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r);ctx.restore()});raf=requestAnimationFrame(draw)}draw();setTimeout(()=>{cancelAnimationFrame(raf);ctx.clearRect(0,0,cv.width,cv.height)},4000);
 }
-let game,sync,chat,my=null,voiceStream=null,muted=false,started=false;
+let game,sync,chat,my=null,voiceStream=null,muted=false,started=false,selectedToken=null;
 function updateUI(){
   if(!game)return;
   renderTokens(game);
@@ -765,13 +855,13 @@ function updateUI(){
   }
   if(game.diceRolled)highlightValid(game);
   else document.querySelectorAll('.token').forEach(t=>t.classList.remove('valid','valid-jota'));
+  renderMovePanel(game);
   $('#rollBtn').disabled=game.diceRolled||!!game.winner||game.current!==my;
   $('#rollBtn').textContent=game.diceRolled?'Chal baki...':(game.pendingRolls.length?'🎲 Roll Again':'🎲 Roll Dice');
-  const hist=JSON.parse(localStorage.getItem('sn-history')||'[]');const h=$('#hist');if(hist.length===0)h.textContent='No matches yet';else{h.innerHTML=hist.slice().reverse().slice(0,8).map(x=>`<div style="display:flex;justify-content:space-between;padding:6px 8px;background:rgba(255,255,255,.05);border-radius:8px;margin-bottom:4px"><span>🏆 ${PLAYER_DEF[x.winner].name}</span><span style="color:var(--muted)">${new Date(x.at).toLocaleTimeString()}</span></div>`).join('')}
+  let hist=[];try{const saved=JSON.parse(localStorage.getItem('sn-history')||'[]');if(Array.isArray(saved))hist=saved.filter(x=>x&&PLAYER_DEF[x.winner]&&Number.isFinite(Number(x.at)))}catch{}const h=$('#hist');if(hist.length===0)h.textContent='No matches yet';else{h.innerHTML=hist.slice().reverse().slice(0,8).map(x=>`<div style="display:flex;justify-content:space-between;padding:6px 8px;background:rgba(255,255,255,.05);border-radius:8px;margin-bottom:4px"><span>🏆 ${PLAYER_DEF[x.winner].name}</span><span style="color:var(--muted)">${new Date(x.at).toLocaleTimeString()}</span></div>`).join('')}
 }
 function bindEvents(){
-  const makeMove=(tok,dice)=>{
-    const p=tok.dataset.player,id=parseInt(tok.dataset.id);
+  const makeMove=(p,id,dice)=>{
     const res=game.move(id,p,dice);
     if(res.error){toast(res.error,3500);playS('kill');return}
     if(res.capturedJota){playS('kill');toast(`💥 Jota vs Jota capture! Bonus roll paba.`);}
@@ -779,18 +869,21 @@ function bindEvents(){
     else if(res.finished){playS('home');toast('Home! Sob saved chal seshe bonus roll.');}
     else if(res.jota){playS('move');toast(`🧱 Jota moved ${res.rolledDice}→${res.movedSteps} squares`);}
     else playS('move');
-    sync.publish();updateUI();
+    selectedToken=null;sync.publish();updateUI();
     if(res.turnComplete&&game.current===p&&!res.win)toast('🎁 Bonus roll — abar dice maro');
   };
   $('#board').addEventListener('click',e=>{
-    const choice=e.target.closest('.move-choice');
     const tok=e.target.closest('.token');if(!tok)return;
     const p=tok.dataset.player;
     if(p!==my){toast('Eta tomar guti na');return}
     if(p!==game.current){toast('Tor turn na');return}
     if(!game.diceRolled){toast(game.pendingRolls.length?'6 peyecho — abar dice maro':'Age dice roll kor');return}
-    if(choice){e.stopPropagation();makeMove(tok,Number(choice.dataset.dice));return}
-    showMoveOptions(tok,game);
+    selectTokenForMove(tok,game);
+  });
+  $('#movePanelChoices').addEventListener('click',e=>{
+    const choice=e.target.closest('.move-choice');if(!choice||!selectedToken)return;
+    if(game.current!==my||selectedToken.player!==my){toast('Tor turn na');return}
+    makeMove(selectedToken.player,selectedToken.id,Number(choice.dataset.dice));
   });
   $('#rollBtn').addEventListener('click',()=>{
     if(game.current!==my){toast('Tor turn na');return}
@@ -828,17 +921,18 @@ async function start(p){
   try{await loginFlow(p)}catch{started=false;$('#cardS').disabled=false;$('#cardN').disabled=false;return}
   my=p;$('#welcomeScreen').classList.remove('active');$('#gameScreen').classList.add('active');
   game=new Engine();
-  try{const sv=localStorage.getItem('sn-state-v4');if(sv)game.setState(JSON.parse(sv))}catch{}
+  try{const sv=localStorage.getItem('sn-state-v5')||localStorage.getItem('sn-state-v4');if(sv)game.setState(JSON.parse(sv))}catch{}
   createClassicBoard();
-  sync=new Sync(game);sync.onState=()=>updateUI();await sync.initPeer(p);
+  const other=p==='sultan'?'nuva':'sultan',otherStatus=`#status${other==='sultan'?'S':'N'}`;
+  sync=new Sync(game);sync.onState=()=>updateUI();sync.onPresence=online=>{$(otherStatus).textContent=online?'Online':'Offline'};await sync.initPeer(p);
   chat=new Chat(sync,p);
   bindEvents();updateUI();
-  const beat=()=>{localStorage.setItem(`sn-beat-${p}`,Date.now());const other=p==='sultan'?'nuva':'sultan';const ob=parseInt(localStorage.getItem(`sn-beat-${other}`)||'0');const online=Date.now()-ob<15000;$(`#status${other==='sultan'?'S':'N'}`).textContent=online?'Online':'Offline';$(`#status${p==='sultan'?'S':'N'}`).textContent='Online (You)'};setInterval(beat,2000);beat();
+  const beat=()=>{let localOnline=false;try{localStorage.setItem(`sn-beat-${p}`,Date.now());const ob=parseInt(localStorage.getItem(`sn-beat-${other}`)||'0');localOnline=Date.now()-ob<15000}catch{}const peerOnline=!!(sync.conn&&sync.conn.open);$(otherStatus).textContent=(peerOnline||localOnline)?'Online':'Offline';$(`#status${p==='sultan'?'S':'N'}`).textContent='Online (You)'};setInterval(beat,2000);beat();
   toast(`Welcome ${PLAYER_DEF[p].name}! Jota Master Mode active - 2→1,4→2,6→3`);
 }
 window.start=start;
 $('#cardS').addEventListener('click',()=>start('sultan'));
 $('#cardN').addEventListener('click',()=>start('nuva'));
 </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1f663d46cdb311c',t:'MTc4NDc2NDY3MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
